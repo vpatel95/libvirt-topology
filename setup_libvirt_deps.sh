@@ -15,7 +15,9 @@ sudo apt-get install -y \
     libguestfs-tools \
     virt-manager \
     libosinfo-bin \
-    iptables-persistent
+    iptables-persistent \
+    python3-dev \
+    python3-pip
 
 pip3 install libvirt-python
 

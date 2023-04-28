@@ -49,7 +49,7 @@ fi
 
 sudo sysctl -p
 
-if [[ ! -f "${HOME}/.topology/bridges/${BR_NAME}" ]]; then
+if [[ ! -d "${HOME}/.topology/bridges/${BR_NAME}" ]]; then
     # DHCP packets sent to VMs have no checksum (due to a longstanding bug).
     sudo iptables -t mangle -A POSTROUTING -o ${BR_NAME} -p udp -m udp --dport 68 -j CHECKSUM --checksum-fill
 
@@ -78,6 +78,8 @@ if [[ ! -f "${HOME}/.topology/bridges/${BR_NAME}" ]]; then
     # Allow traffic between virtual machines.
     sudo iptables -t filter -A FORWARD -i ${BR_NAME} -j ACCEPT
     sudo iptables -t filter -A FORWARD -o ${BR_NAME} -j ACCEPT
+
+    sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
 
     sudo mkdir -p /var/lib/dnsmasq/${BR_NAME}
     sudo touch /var/lib/dnsmasq/${BR_NAME}/hostsfile
@@ -122,6 +124,8 @@ EOF
 
     sudo systemctl enable dnsmasq@${BR_NAME}.service
     sudo systemctl start dnsmasq@${BR_NAME}.service
+
+    sudo mkdir -p  "${HOME}/.topology/bridges/${BR_NAME}"
 else
     echo "Bridge already setup. Restarting dnsmasq"
     sudo systemctl restart dnsmasq@${BR_NAME}.service
