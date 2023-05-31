@@ -39,19 +39,11 @@ function create_pe() {
     VM_NAME=${1}
     VNC_PORT=${2}
 
-    USER_DATA_CFG=${3}
-    NW_DATA_CFG=${4}
-
     sudo mkdir -p /var/lib/libvirt/images/${VM_NAME}
     sudo qemu-img convert -f qcow2 -O qcow2 \
         /var/lib/libvirt/images/templates/ubuntu-22.04-server.qcow2 \
         /var/lib/libvirt/images/$VM_NAME/root-disk.qcow2
     sudo qemu-img resize /var/lib/libvirt/images/$VM_NAME/root-disk.qcow2 80G
-
-    sudo cloud-localds \
-        -N ${NW_DATA_CFG} \
-        /var/lib/libvirt/images/$VM_NAME/cloud-init.iso \
-        ${USER_DATA_CFG}
 
     sudo virt-install \
         --virt-type kvm \
@@ -61,7 +53,6 @@ function create_pe() {
         --os-variant ubuntu20.04 \
         --graphics vnc,listen=0.0.0.0,port=${VNC_PORT} \
         --disk path=/var/lib/libvirt/images/${VM_NAME}/root-disk.qcow2,bus=virtio,format=qcow2 \
-        --disk /var/lib/libvirt/images/$VM_NAME/cloud-init.iso,device=cdrom \
         --network bridge=br-mgmt1,model=virtio \
         --network bridge=br1,model=virtio \
         --network bridge=br2,model=virtio \
@@ -75,19 +66,11 @@ function create_ce() {
     VM_NAME=${1}
     VNC_PORT=${2}
 
-    USER_DATA_CFG=${3}
-    NW_DATA_CFG=${4}
-
     sudo mkdir -p /var/lib/libvirt/images/${VM_NAME}
     sudo qemu-img convert -f qcow2 -O qcow2 \
         /var/lib/libvirt/images/templates/ubuntu-22.04-server.qcow2 \
         /var/lib/libvirt/images/$VM_NAME/root-disk.qcow2
     sudo qemu-img resize /var/lib/libvirt/images/$VM_NAME/root-disk.qcow2 40G
-
-    sudo cloud-localds \
-        -N ${NW_DATA_CFG} \
-        /var/lib/libvirt/images/$VM_NAME/cloud-init.iso \
-        ${USER_DATA_CFG}
 
     sudo virt-install \
         --virt-type kvm \
@@ -96,9 +79,7 @@ function create_ce() {
         --ram 8192 \
         --os-variant ubuntu20.04 \
         --graphics vnc,listen=0.0.0.0,port=${VNC_PORT} \
-        --cdrom /var/lib/libvirt/boot/ubuntu-22.04.2-live-server-amd64.iso \
         --disk path=/var/lib/libvirt/images/${VM_NAME}/root-disk.qcow2,bus=virtio,format=qcow2 \
-        --disk /var/lib/libvirt/images/$VM_NAME/cloud-init.iso,device=cdrom \
         --network bridge=br-mgmt1,model=virtio \
         --network bridge=br-iso1,model=virtio \
         --network bridge=br-iso2,model=virtio \
@@ -110,6 +91,13 @@ function create_ce() {
 function create_dev() {
     VM_NAME=${1}
     VNC_PORT=${2}
+
+    sudo mkdir -p /var/lib/libvirt/images/${VM_NAME}
+    sudo qemu-img convert -f qcow2 -O qcow2 \
+        /var/lib/libvirt/images/templates/ubuntu-22.04-server.qcow2 \
+        /var/lib/libvirt/images/$VM_NAME/root-disk.qcow2
+    sudo qemu-img resize /var/lib/libvirt/images/$VM_NAME/root-disk.qcow2 40G
+
     sudo virt-install \
         --virt-type kvm \
         --name ${VM_NAME} \
@@ -117,12 +105,12 @@ function create_dev() {
         --ram 65536 \
         --os-variant ubuntu20.04 \
         --graphics vnc,listen=0.0.0.0,port=${VNC_PORT} \
-        --cdrom /var/lib/libvirt/boot/ubuntu-22.04.2-live-server-amd64.iso \
-        --disk path=/var/lib/libvirt/images/${VM_NAME}.qcow2,size=300,bus=virtio,format=qcow2 \
+        --disk path=/var/lib/libvirt/images/${VM_NAME}/root-disk.qcow2,bus=virtio,format=qcow2 \
         --network bridge=br-mgmt1,model=virtio \
         --network bridge=br1,model=virtio \
         --network bridge=br2,model=virtio \
-        --noautoconsole
+        --noautoconsole \
+        --import
 }
 
 function delete_vm() {
@@ -151,11 +139,9 @@ case $OPER in
                 create_pe ${1} ${3}
                 ;;
             ce)
-                shift
                 create_ce ${1} ${3}
                 ;;
             dev)
-                shift
                 create_dev ${1} ${3}
                 ;;
             *)
