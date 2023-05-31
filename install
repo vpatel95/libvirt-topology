@@ -23,3 +23,12 @@ pip3 install libvirt-python
 
 sudo usermod -a -G libvirt $USER
 sudo usermod -a -G libvirt-qemu $USER
+
+chmod +x ./scripts/*
+
+sudo cp ./scripts/create_nat_network.sh /usr/bin/create_nat_network
+sudo cp ./scripts/create_management_network.sh /usr/bin/create_management_network
+sudo cp ./scripts/create_isolated_network.sh /usr/bin/create_isolated_network
+sudo cp ./scripts/vm_helper.sh /usr/bin/vm_helper
+
+sudo pip3 install .
