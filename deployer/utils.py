@@ -4,7 +4,7 @@ import subprocess
 import sys
 import argparse
 
-import config
+from .config import DRY_RUN
 
 def ProcessArguments() -> str:
     parser = argparse.ArgumentParser(description="Parse topology config")
@@ -22,12 +22,12 @@ def ProcessArguments() -> str:
         logging.basicConfig(level=log_level)
 
     if args.dry_run:
-        config.DRY_RUN = args.dry_run
+        DRY_RUN = args.dry_run
 
     return args.config
 
 def ExecuteCommand(cmd: str) -> None:
-    if not config.DRY_RUN:
+    if not DRY_RUN:
         logging.info("Executing command : {}".format(cmd))
         ret = subprocess.call(shlex.split(cmd))
         if ret != 0:

@@ -2,9 +2,9 @@ import logging
 import yaml
 import ipaddress
 
-import network as N
-import config
-import utils
+from .network import Network
+from .config import LIBVIRT_IMAGES, UBUNTU_TEMPLATE
+from .utils import ExecuteCommand
 
 class VirtualMachine:
     name_ = ""
@@ -24,7 +24,7 @@ class VirtualMachine:
         self.name_ = conf["name"]
         self.flavor_ = conf["flavor"]
         self.vnc_port_ = int(conf["vnc_port"])
-        self.libvirt_vm_base = config.LIBVIRT_IMAGES.joinpath(self.name_)
+        self.libvirt_vm_base = LIBVIRT_IMAGES.joinpath(self.name_)
         self.user_data_cfg_ = self.libvirt_vm_base.joinpath("user-data.cfg")
         self.network_data_cfg_ = self.libvirt_vm_base.joinpath("nw-data.cfg")
         self.root_disk_ = self.libvirt_vm_base.joinpath("root_disk.qcow2")
@@ -108,7 +108,7 @@ class VirtualMachine:
             yaml.dump(network_config, nw_config_f, sort_keys=False)
 
 
-    def __generate_mgmt_config(self, ip4: str, nw: N.Network) -> dict:
+    def __generate_mgmt_config(self, ip4: str, nw: Network) -> dict:
         addr = ""
         if nw.network4_ is not None:
             addr = "{}/{}".format(ip4, nw.network4_.prefixlen)
@@ -121,7 +121,7 @@ class VirtualMachine:
         }
         return mgmt_nw_config
 
-    def __generate_nat_config(self, ip4: str, ip6: str, nw: N.Network) -> dict:
+    def __generate_nat_config(self, ip4: str, ip6: str, nw: Network) -> dict:
         addresses = []
 
         if nw.network4_ is not None:
@@ -169,18 +169,18 @@ class VirtualMachine:
 
     def __create_root_disk(self) -> None:
         cmd = "sudo qemu-img convert -f qcow2 -O qcow2 {} {}".format(
-                config.UBUNTU_TEMPLATE, self.root_disk_)
-        utils.ExecuteCommand(cmd)
+                UBUNTU_TEMPLATE, self.root_disk_)
+        ExecuteCommand(cmd)
 
         cmd = "sudo qemu-img resize {} {}".format(self.root_disk_, self.root_disk_sz_)
-        utils.ExecuteCommand(cmd)
+        ExecuteCommand(cmd)
 
     def __generate_cloud_init_iso(self) -> None:
         cmd = "sudo cloud-localds -N {} {} {}".format(
                 self.network_data_cfg_,
                 self.cloud_init_iso_,
                 self.user_data_cfg_)
-        utils.ExecuteCommand(cmd)
+        ExecuteCommand(cmd)
 
 
     def __execute_virt_install_cmd(self):
@@ -200,7 +200,7 @@ class VirtualMachine:
                               name_arg, cpu_ram_arg, graphic_arg, root_disK_arg,
                               cloud_init_arg, network_args))
 
-        utils.ExecuteCommand(cmd)
+        ExecuteCommand(cmd)
 
 
     def Create(self):

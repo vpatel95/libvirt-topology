@@ -1,8 +1,7 @@
-from topology import Topology
-import utils
+from .topology import Topology
+from .utils import ProcessArguments
 
-if __name__ == "__main__":
-
-    conf_file = utils.ProcessArguments()
+def topology_deployer():
+    conf_file = ProcessArguments()
     topology = Topology()
     topology.Init(conf_file)
