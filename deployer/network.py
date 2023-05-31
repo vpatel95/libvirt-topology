@@ -1,7 +1,12 @@
 import ipaddress
 import logging
 import sys
+from xml.dom import minidom
+import xml.etree.cElementTree as ET
 
+import deployer.globals as globals
+from .globals import LIBVIRT_QEMU_NW, NAT_NW_BASE
+from .nat_utils import AddIptableRules, AddLinuxBridge, CheckForwarding
 from .utils import ExecuteCommand
 
 class Network:
@@ -26,7 +31,6 @@ class Network:
         if self.type_ in ["nat", "management"]:
             self.__create_v4_network(conf.get("subnet4", None))
             self.__create_v6_network(conf.get("subnet6", None))
-            logging.debug(self.ToString())
 
     def __create_v4_network(self, subnet4: str) -> None:
         if subnet4 is not None:
@@ -53,26 +57,83 @@ class Network:
 
     def __create_nat_network(self) -> None:
         logging.info("Creating NAT network : {}".format(self.name_))
-        cmd = "create_nat_network {} {} {} {} {} {}".format(
-                self.name_, self.network4_,
-                self.ip4_, self.dhcp_start4_,
-                self.dhcp_end4_, self.broadcast4_)
-        ExecuteCommand(cmd)
 
+        try:
+            if not globals.DRY_RUN:
+                NAT_NW_BASE.joinpath(self.name_).mkdir(parents=True)
+        except Exception as e:
+            logging.warning("Nat network {} already exists.".format(self.name_))
+            logging.error(str(e))
+            return
+
+        CheckForwarding()
+
+        plen4 = 24
+        plen6 = 120
+        if self.network4_:
+            plen4 = self.network4_.prefixlen
+        if self.network6_:
+            plen6 = self.network6_.prefixlen
+
+        AddLinuxBridge(self.name_, str(self.ip4_), str(self.ip6_), plen4, plen6)
+        AddIptableRules(self.name_, str(self.network4_))
 
     def __create_management_network(self) -> None:
         logging.info("Creating Management network : {}".format(self.name_))
-        if self.network4_ is not None:
-            cmd = "create_management_network {} {} {} {} {}".format(
-                    self.name_, self.ip4_,
-                    self.network4_.netmask, self.dhcp_start4_,
-                    self.dhcp_end4_)
-            ExecuteCommand(cmd)
+        nw_cfg_file = LIBVIRT_QEMU_NW.joinpath("{}.xml".format(self.name_))
+
+        if nw_cfg_file.is_file():
+            logging.warning("Management network {} already exists".format(self.name_))
+            return
+
+        nw_ele = ET.Element("network")
+        ET.SubElement(nw_ele, "name").text = self.name_
+        ET.SubElement(nw_ele, "bridge", {"name": self.name_, "stp": "on", "delay": "0"})
+        ip_ele = ET.SubElement(nw_ele, "ip", {
+            "address": str(self.ip4_),
+            "netmask": str(self.network4_)
+        })
+        dhcp_ele = ET.SubElement(ip_ele, "dhcp")
+        ET.SubElement(dhcp_ele, "range", {
+            "start": str(self.dhcp_start4_),
+            "end": str(self.dhcp_end4_)
+        })
+
+        xmlstr = minidom.parseString(ET.tostring(nw_ele)).toprettyxml(indent="   ")
+        with open (nw_cfg_file, "w") as f:
+            f.write(xmlstr)
+
+        cmd = "sudo virsh net-define {}".format(nw_cfg_file)
+        ExecuteCommand(cmd)
+        cmd = "sudo virsh net-start {}".format(self.name_)
+        ExecuteCommand(cmd)
+        cmd = "sudo virsh net-autostart {}".format(self.name_)
+        ExecuteCommand(cmd)
+
 
     def __create_isolated_network(self) -> None:
         logging.info("Creating Isolated network : {}".format(self.name_))
-        cmd = "create_isolated_network {}".format(self.name_)
+        nw_cfg_file = LIBVIRT_QEMU_NW.joinpath("{}.xml".format(self.name_))
+
+        if nw_cfg_file.is_file():
+            logging.warning("Isolated network {} already exists".format(self.name_))
+            return
+
+        nw_ele = ET.Element("network")
+        ET.SubElement(nw_ele, "name").text = self.name_
+        ET.SubElement(nw_ele, "bridge", {"name": self.name_, "stp": "on", "delay": "0"})
+
+        xmlstr = minidom.parseString(ET.tostring(nw_ele)).toprettyxml(indent="   ")
+        with open (nw_cfg_file, "w") as f:
+            f.write(xmlstr)
+
+        cmd = "sudo virsh net-define {}".format(nw_cfg_file)
         ExecuteCommand(cmd)
+        cmd = "sudo virsh net-start {}".format(self.name_)
+        ExecuteCommand(cmd)
+        cmd = "sudo virsh net-autostart {}".format(self.name_)
+        ExecuteCommand(cmd)
+
 
     def Create(self):
         if self.type_ == "nat":
