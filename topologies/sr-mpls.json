@@ -105,7 +105,7 @@
     }, {
         "name": "ce11",
         "flavor": "ce",
-        "vnc_port": 5921,
+        "vnc_port": 5911,
         "networks": {
             "sr-br-mgmt1": {
                 "v4": "20.25.1.11"
