@@ -17,7 +17,6 @@ if [[ "$#" -ne 5 ]]; then
     exit 1
 fi
 
-set -x
 # Read from config
 BR_NAME=${1}
 BR_ADDR=${2}
@@ -25,6 +24,11 @@ BR_NETMASK=${3}
 BR_START_IP=${4}
 BR_END_IP=${5}
 
+
+if [[ -f "/etc/libvirt/qemu/networks/${BR_NAME}.xml" ]]; then
+    echo "File found /etc/libvirt/qemu/networks/${BR_NAME}.xml"
+    exit
+fi
 
 if [[ ! -f "/etc/libvirt/qemu/networks/${BR_NAME}.xml" ]]; then
 sudo tee -a /etc/libvirt/qemu/networks/${BR_NAME}.xml > /dev/null << EOF
@@ -38,15 +42,10 @@ sudo tee -a /etc/libvirt/qemu/networks/${BR_NAME}.xml > /dev/null << EOF
     </ip>
 </network>
 EOF
-fi
 
-if [[ -f "/etc/libvirt/qemu/networks/${BR_NAME}.xml" ]]; then
-    echo "File found /etc/libvirt/qemu/networks/${BR_NAME}.xml"
-    exit
-else
     sudo virsh net-define /etc/libvirt/qemu/networks/${BR_NAME}.xml
     sudo virsh net-start ${BR_NAME}
     sudo virsh net-autostart ${BR_NAME}
 fi
 
-set +xe
+set +e
