@@ -28,12 +28,12 @@ EOF
 fi
 
 if [[ -f "/etc/libvirt/qemu/networks/${BR_NAME}.xml" ]]; then
+    echo "File found /etc/libvirt/qemu/networks/${BR_NAME}.xml"
+    exit
+else
     sudo virsh net-define /etc/libvirt/qemu/networks/${BR_NAME}.xml
     sudo virsh net-start ${BR_NAME}
     sudo virsh net-autostart ${BR_NAME}
-else
-    echo "File not found /etc/libvirt/qemu/networks/${BR_NAME}.xml"
-    exit
 fi
 
 set +xe

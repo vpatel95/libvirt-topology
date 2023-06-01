@@ -53,7 +53,7 @@ class Network:
 
     def __create_nat_network(self) -> None:
         logging.info("Creating NAT network : {}".format(self.name_))
-        cmd = "bash create_nat_network.sh {} {} {} {} {} {}".format(
+        cmd = "create_nat_network {} {} {} {} {} {}".format(
                 self.name_, self.network4_,
                 self.ip4_, self.dhcp_start4_,
                 self.dhcp_end4_, self.broadcast4_)
@@ -62,15 +62,16 @@ class Network:
 
     def __create_management_network(self) -> None:
         logging.info("Creating Management network : {}".format(self.name_))
-        cmd = "bash create_management_network.sh {} {} {} {} {}".format(
-                self.name_, self.network4_,
-                self.ip4_, self.dhcp_start4_,
-                self.dhcp_end4_)
-        ExecuteCommand(cmd)
+        if self.network4_ is not None:
+            cmd = "create_management_network {} {} {} {} {}".format(
+                    self.name_, self.ip4_,
+                    self.network4_.netmask, self.dhcp_start4_,
+                    self.dhcp_end4_)
+            ExecuteCommand(cmd)
 
     def __create_isolated_network(self) -> None:
         logging.info("Creating Isolated network : {}".format(self.name_))
-        cmd = "bash create_isolated_network.sh {}".format(self.name_)
+        cmd = "create_isolated_network {}".format(self.name_)
         ExecuteCommand(cmd)
 
     def Create(self):
