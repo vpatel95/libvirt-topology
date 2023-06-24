@@ -1,31 +1,23 @@
-# libvirt-topology
-Scripts to facilitate creating vm based topology using libvirt
+# topology-deployer
+Python tool to deploy topologies from the defined json config files.
 
 ## Table of Contents
 1. [Prerequisites](#prereq)
 2. [Network](#network_types)
     1. [Management Network](#mgmt_nw)
     2. [Custom NAT Network](#nat_nw)
-    3. [Isolated Network](#iso_nw) 
+    3. [Isolated Network](#iso_nw)
 3. [Virtual Manchines](#vms)
-    2. [Create VM Shell Script](#cv_install)
+4. [JSON Topology Config](#json_conf)
+    1. [JSON Network Config](#json_nw)
+    2. [JSON Virtual Machine Config](#json_vm)
 
 ## Prerequisites <a name = "prereq"></a>
 
 ### Required Packages
-1. bridge-utils
-2. libvirt-clients
-3. libvirt-daemon
-4. qemu
-5. qemu-kvm
-6. libvirt-dev
-7. libvirt-daemon-system
-8. libguestfs-tools
-9. virt-manager
-10. libosinfo-bin
-11. iptables-persistent
-12. python3-dev
-13. python3-pip
+```
+sudo apt-get install -y bridge-utils libvirt-clients libvirt-daemon qemu qemu-kvm libvirt-dev libvirt-daemon-system libguestfs-tools virt-manager libosinfo-bin iptables-persistent python3-dev python3-pip
+```
 
 ### Add user to appropriate groups
 ```
@@ -33,7 +25,7 @@ sudo usermod -a -G libvirt $USER
 sudo usermod -a -G libvirt-qemu $USER
 ```
 
-## Network <a name = "network_types"></a>
+## Networks <a name = "network_types"></a>
 1. Management network
 2. Custom NAT network
 3. Isolated network
@@ -47,140 +39,119 @@ virsh net-autostart --disable default
 ```
 
 ### Management Network <a name = "mgmt_nw"></a>
-This is a host only network used for SSH connections. This is a libvirt managed network. During creation of VM, one of the network should be connected to virtual bridge for the management network. Use the helper script `setup_management_network.sh` to create a Management network.
-
-```
-Usage: 
-	bash setup_management_network.sh <bridge_name> <bridge_addr> <bridge_netmask> <dhcp_start> <dhcp_end>
-		bridge_name : string
-		bridge_addr : X.X.X.X
-		bridge_netmask : X.X.X.X
-		dhcp_start : X.X.X.X
-		dhcp_end : X.X.X.X
-```
-Example :
-```
-bash setup_management_network.sh br-mgmt1 10.25.1.1 255.255.255.0 10.25.1.2 10.25.1.254
-```
-
-Verify the network is created. If you see a default network, follow steps mentioned above to disable it.
-```
-$ virsh net-list
- Name       State    Autostart   Persistent
----------------------------------------------
- br-mgmt1   active   yes         yes
-```
+This is a libvirt managed host only network used for SSH connections. During creation of VM, one of the network should be connected to virtual bridge for the management network.
 
 ### Custom NAT Network <a name = "nat_nw"></a>
 To overcome the challenges of libvirt's NAT network, we will create a Custom NAT network using four main components: a dummy network interface, a virtual bridge, some iptables rules, and dnsmasq.
 
-Use the `create_nat_network.sh` script to create custom networks. 
-
-```
-Usage: 
-	bash setup_nat_network.sh <bridge_name> <bridge_subnet> <bridge_addr> <dhcp_start> <dhcp_end> <broadcast>
-		bridge_name : string
-		bridge_subnet : X.X.X.X/mask
-		bridge_addr : X.X.X.X
-		dhcp_start : X.X.X.X
-		dhcp_end : X.X.X.X
-		broadcast : X.X.X.255
-```
-
-Example :
-```
-bash setup_topology_bridge.sh br1 10.10.1.0/24 10.10.1.1 10.10.1.2 10.10.1.254 10.10.1.255
-```
-Repeat the same command with different subnet and bridge to get a new network.
-
-Verify the network
-```
-$ ip link show | grep br1
-14: br1-nic: <BROADCAST,NOARP,UP,LOWER_UP> mtu 1500 qdisc noqueue master br1 state UNKNOWN mode DEFAULT group default qlen 1000
-15: br1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000
-
-$ sudo systemctl status dnsmasq@br1         
-* dnsmasq@br1.service - DHCP and DNS caching server for br1.
-     Loaded: loaded (/etc/systemd/system/dnsmasq@.service; enabled; vendor preset: enabled)
-     Active: active (running) since Tue 2023-04-18 10:32:30 PDT; 2 weeks 3 days ago
-   Main PID: 658406 (dnsmasq)
-      Tasks: 1 (limit: 621975)
-     Memory: 10.7M
-     CGroup: /system.slice/system-dnsmasq.slice/dnsmasq@br1.service
-             `-658406 /usr/sbin/dnsmasq -k --conf-file=/var/lib/dnsmasq/br1/dnsmasq.conf
-             
-$ sudo cat /etc/iptables/rules.v4
-```
-
 ### Isolated Network <a name = "iso_nw"></a>
 Isolated Network are completely private to guest systems. All the guests on same isolated network will be able to communicate to each other
 
-Use the `setup_isolated_network.sh` script to create isolated network for guest systems.
-
-```
-Usage: 
-	bash setup_isolated_network.sh <bridge_name>
-		bridge_name : string
-```
-
-Example:
-```
-bash setup_isolated_network.sh br-iso1
-```
-
-Verify the network is created.
-```
-$ virsh net-list
- Name       State    Autostart   Persistent
----------------------------------------------
- br-iso1    active   yes         yes
- br-mgmt1   active   yes         yes
-```
-
-
 ## Virtual Machines <a name = "vms"></a>
-For our topology we will create virtual machines using libvirt. Currently, manual intervention is required to install guest os on the virtual machines. However this can be avoided by creating a pre cooked template VM and using that to clone different VMs.
-
-
-
-### Create VM Shell script <a name = "cv_install"></a>
-Presently the `create_vm.sh` script supports two types of VM. PE (provider edge) and CE (customer edge). 
+For our topology we will create virtual machines using libvirt. There are 2 pre-defined flavors for VMs, which will have configured memory, vcpus and disk size. This can be overriden from the json config if required.
 
 #### PE Virtual Machine
 1. Memory : 16G
 2. vCPUs : 8
 3. Disk : 80G
-4. 5 network interfaces
-    1. 1 Management network
-    2. 2 NAT Network
-    3. 2 Isolated Network
-5. Display : VNC
 
 #### CE Virtual Machine
 1. Memory : 8G
 2. vCPUs : 4
 3. Disk : 40G
-4. 4 network interfaces
-    1. 1 Management network
-    2. 1 NAT Network (Only used if required to install packages and basic bring up)
-    3. 2 Isolated Network
-5. Display : VNC
 
-```
-Usage
-	bash create_vm.sh <vm-type> <vm-name> <vnc-port>
+## JSON Topology Config <a name = "json_conf"></a>
+The json config to define topologies comprises of 2 sections.
+1. Networks
+2. Virtual Machines
 
-	   1. vm-type : <pe | ce> (pe = provider edge, ce = customer edge)
-	   2. vm-name : <name>
-	   4. vnc-port : <port> (port >= 5900)
+### JSON Network Config <a name = "json_nw"></a>
+The JSON network object comprises of array of required type of networks. A network object skeleton is shown below
+
+```json
+{
+    "networks" : {
+        "nat" : [],
+        "isolated" : [],
+        "management" : []
+    }
+}
 ```
 
-Example for PE:
-```
-bash create_vm.sh pe pe1 5901
+#### Add NAT network in JSON network object
+For nat network, `name` and `subnet4` are mandatory fields. `subnet6` is optional in case you need v6 network in your topology. To have multiple NAT networks, you can add multiple objects in the networks.nat json object.
+
+```json
+{
+    "networks" : {
+        "nat" : [{
+            "name" : "",
+            "subnet4" : "",
+            "subnet6" : ""
+        }]
+    }
+}
 ```
 
-Example for CE
+#### Add Management network in JSON network object
+For management network, `name` and `subnet4` are mandatory fields. Currently we do not support v6 management network. To have multiple NAT networks, you can add multiple objects in the networks.management json object.
+
+```json
+{
+    "networks" : {
+        "management" : [{
+            "name" : "",
+            "subnet4" : ""
+        }]
+    }
+}
 ```
-bash create_vm.sh ce ce11 5911
+
+#### Add Isolated network in JSON network object
+For isolated network, `name` is mandatory fields. To have multiple NAT networks, you can add multiple objects in the networks.isolated json object.
+
+```json
+{
+    "networks" : {
+        "isolated" : [{
+            "name" : ""
+        }]
+    }
+}
 ```
+
+### JSON Virtual Machine Config <a name = "json_vm"></a>
+The vms object is array of multiple vm objects. For the vm object on the JSON config, `name`, `flavor`, `vnc_port` and `networks` are mandatory fields. You can optionally use `ram`, `vcpus` and `disk` to override the defaults for the flavor. A vms object skeleton is shown below
+
+```json
+{
+    "vms" : [{
+        "name" : "",
+        "flavor" : "",
+        "vnc_port" : "",
+        "networks" : {
+            "<nw_name1>" : {
+                "v4" : ""
+            },
+            "<nw_name2>" : {
+                "v4" : "",
+                "v6" : ""
+            }
+        }
+    }]
+}
+```
+
+To define networks for the vm, you have to use the network name as key and provide `v4` address. You can also add a `v6` address if the network type is NAT.
+
+## Sample Topology Configurations
+
+### A two PE and two CE topology
+```
+|-------|      |---------|                |---------|      |-------|
+|  CE1  |======|   PE1   |================|   PE2   |======|  CE2  |
+|       |======|         |================|         |======|       |
+|-------|      |---------|                |---------|      |-------|
+```
+
+Topology Config : [2PE-CE.json](topologies/2PE-CE.json)
