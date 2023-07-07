@@ -89,15 +89,17 @@ class Network:
         nw_ele = ET.Element("network")
         ET.SubElement(nw_ele, "name").text = self.name_
         ET.SubElement(nw_ele, "bridge", {"name": self.name_, "stp": "on", "delay": "0"})
-        ip_ele = ET.SubElement(nw_ele, "ip", {
-            "address": str(self.ip4_),
-            "netmask": str(self.network4_)
-        })
-        dhcp_ele = ET.SubElement(ip_ele, "dhcp")
-        ET.SubElement(dhcp_ele, "range", {
-            "start": str(self.dhcp_start4_),
-            "end": str(self.dhcp_end4_)
-        })
+
+        if self.network4_:
+            ip_ele = ET.SubElement(nw_ele, "ip", {
+                "address": str(self.ip4_),
+                "netmask": str(self.network4_.netmask)
+            })
+            dhcp_ele = ET.SubElement(ip_ele, "dhcp")
+            ET.SubElement(dhcp_ele, "range", {
+                "start": str(self.dhcp_start4_),
+                "end": str(self.dhcp_end4_)
+            })
 
         xmlstr = minidom.parseString(ET.tostring(nw_ele)).toprettyxml(indent="   ")
         with open (nw_cfg_file, "w") as f:
