@@ -1,21 +1,21 @@
 {
     "networks" : {
         "nat": [{
-            "name": "topo1-br1",
+            "name": "evpn-br1",
             "subnet4": "10.10.1.0/24",
             "subnet6": "1234::10.10.1.0/120"
         }, {
-            "name": "topo1-br2",
+            "name": "evpn-br2",
             "subnet4": "10.10.2.0/24",
             "subnet6": "1234::10.10.2.0/120"
         }],
         "isolated": [{
-            "name": "topo1-br-iso1"
+            "name": "evpn-br-iso1"
         }, {
-            "name": "topo1-br-iso2"
+            "name": "evpn-br-iso2"
         }],
         "management": [{
-            "name": "topo1-br-mgmt1",
+            "name": "evpn-br-mgmt1",
             "subnet4": "10.25.1.0/24"
         }]
     },
@@ -24,22 +24,22 @@
         "flavor": "pe",
         "vnc_port": 5910,
         "networks": {
-            "topo1-br-mgmt1": {
+            "evpn-br-mgmt1": {
                 "v4": "10.25.1.10"
             },
-            "topo1-br1": {
+            "evpn-br1": {
                 "v4": "10.10.1.10",
                 "v6": "1234::10.10.1.10"
             },
-            "topo1-br2": {
+            "evpn-br2": {
                 "v4": "10.10.2.10",
                 "v6": "1234::10.10.2.10"
             },
-            "topo1-br-iso1": {
+            "evpn-br-iso1": {
                 "v4": "10.10.14.10",
                 "v6": "1234::10.10.14.10"
             },
-            "topo1-br-iso2": {
+            "evpn-br-iso2": {
                 "v4": "10.10.15.10",
                 "v6": "1234::10.10.15.10"
             }
@@ -49,22 +49,22 @@
         "flavor": "pe",
         "vnc_port": 5920,
         "networks": {
-            "topo1-br-mgmt1": {
+            "evpn-br-mgmt1": {
                 "v4": "10.25.1.20"
             },
-            "topo1-br1": {
+            "evpn-br1": {
                 "v4": "10.10.1.20",
                 "v6": "1234::10.10.1.20"
             },
-            "topo1-br2": {
+            "evpn-br2": {
                 "v4": "10.10.2.20",
                 "v6": "1234::10.10.2.20"
             },
-            "topo1-br-iso1": {
+            "evpn-br-iso1": {
                 "v4": "10.10.24.10",
                 "v6": "1234::10.10.24.10"
             },
-            "topo1-br-iso2": {
+            "evpn-br-iso2": {
                 "v4": "10.10.25.10",
                 "v6": "1234::10.10.25.10"
             }
@@ -74,18 +74,18 @@
         "flavor": "ce",
         "vnc_port": 5911,
         "networks": {
-            "topo1-br-mgmt1": {
+            "evpn-br-mgmt1": {
                 "v4": "10.25.1.11"
             },
-            "topo1-br-iso1": {
+            "evpn-br-iso1": {
                 "v4": "10.10.14.11",
                 "v6": "1234::10.10.14.11"
             },
-            "topo1-br-iso2": {
+            "evpn-br-iso2": {
                 "v4": "10.10.15.11",
                 "v6": "1234::10.10.15.11"
             },
-            "topo1-br1": {
+            "evpn-br1": {
                 "v4": "10.10.1.11",
                 "v6": "1234::10.10.1.11"
             }
@@ -95,18 +95,18 @@
         "flavor": "ce",
         "vnc_port": 5921,
         "networks": {
-            "topo1-br-mgmt1": {
+            "evpn-br-mgmt1": {
                 "v4": "10.25.1.21"
             },
-            "topo1-br-iso1": {
+            "evpn-br-iso1": {
                 "v4": "10.10.24.21",
                 "v6": "1234::10.10.24.21"
             },
-            "topo1-br-iso2": {
+            "evpn-br-iso2": {
                 "v4": "10.10.25.21",
                 "v6": "1234::10.10.25.21"
             },
-            "topo1-br1": {
+            "evpn-br1": {
                 "v4": "10.10.1.21",
                 "v6": "1234::10.10.1.21"
             }
