@@ -19,6 +19,8 @@ def ProcessArguments() -> str:
     skip_operation = parser.add_mutually_exclusive_group()
     skip_operation.add_argument("--no-network", action="store_true")
     skip_operation.add_argument("--no-vm", action="store_true")
+
+    parser.add_argument("--recreate-nw", action="store_true")
     parser.add_argument("--print-nw", action="store_true")
     parser.add_argument("--print-vm", action="store_true")
 
@@ -38,6 +40,10 @@ def ProcessArguments() -> str:
 
     if args.no_vm:
         globals.NO_VM = args.no_vm
+
+    if args.recreate_nw:
+        globals.RECREATE_NW = args.recreate_nw
+        globals.NO_VM = True
 
     if args.print_nw:
         globals.PRINT_NETWORK = args.print_nw
