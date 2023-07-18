@@ -18,7 +18,7 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: Ubuntu",
+        "Operating System :: POSIX :: Linux",
     ],
     install_requires=["pyyaml", "ipaddress"],
     packages=setuptools.find_packages(),
