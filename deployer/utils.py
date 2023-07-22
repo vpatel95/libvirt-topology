@@ -6,6 +6,7 @@ import sys
 
 # from .config import DRY_RUN, NO_NETWORK, NO_VM, PRINT_NETWORK, PRINT_VM
 import deployer.globals as globals
+from .globals import OP_CREATE, OP_DELETE
 
 
 def ProcessArguments() -> str:
@@ -16,13 +17,16 @@ def ProcessArguments() -> str:
                                                           "CRITICAL"])
     parser.add_argument("--dry-run", action="store_true")
 
-    skip_operation = parser.add_mutually_exclusive_group()
-    skip_operation.add_argument("--no-network", action="store_true")
-    skip_operation.add_argument("--no-vm", action="store_true")
+    parser.add_argument("-o", "--operation", type=str, required=True,
+                        choices=["create", "delete", "CREATE", "DELETE"])
 
     parser.add_argument("--recreate-nw", action="store_true")
     parser.add_argument("--print-nw", action="store_true")
     parser.add_argument("--print-vm", action="store_true")
+
+    skip_operation = parser.add_mutually_exclusive_group()
+    skip_operation.add_argument("--no-network", action="store_true")
+    skip_operation.add_argument("--no-vm", action="store_true")
 
     args = parser.parse_args()
 
@@ -34,6 +38,11 @@ def ProcessArguments() -> str:
 
     if args.dry_run:
         globals.DRY_RUN = args.dry_run
+
+    if args.operation.upper() == "CREATE":
+        globals.OP = OP_CREATE
+    else:
+        globals.OP = OP_DELETE
 
     if args.no_network:
         globals.NO_NETWORK = args.no_network

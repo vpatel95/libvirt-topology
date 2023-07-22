@@ -22,7 +22,7 @@
     "vms" : [{
         "name": "pe1",
         "flavor": "pe",
-        "vnc_port": 5910,
+        "vnc_port": 5950,
         "networks": {
             "evpn-br-mgmt1": {
                 "v4": "10.25.1.10"
@@ -47,7 +47,7 @@
     }, {
         "name": "pe2",
         "flavor": "pe",
-        "vnc_port": 5920,
+        "vnc_port": 5960,
         "networks": {
             "evpn-br-mgmt1": {
                 "v4": "10.25.1.20"
@@ -70,9 +70,9 @@
             }
         }
     }, {
-        "name": "ce11",
+        "name": "evpn-ce11",
         "flavor": "ce",
-        "vnc_port": 5911,
+        "vnc_port": 5951,
         "networks": {
             "evpn-br-mgmt1": {
                 "v4": "10.25.1.11"
@@ -91,9 +91,9 @@
             }
         }
     }, {
-        "name": "ce21",
+        "name": "evpn-ce21",
         "flavor": "ce",
-        "vnc_port": 5921,
+        "vnc_port": 5961,
         "networks": {
             "evpn-br-mgmt1": {
                 "v4": "10.25.1.21"
