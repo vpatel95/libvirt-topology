@@ -1,66 +1,76 @@
 # topology-deployer
-Python tool to deploy topologies from the defined json config files.
+Python tool to deploy topologies on Ubuntu from the defined json config files.
 
 ## Table of Contents
 1. [Prerequisites](#prereq)
-2. [Network](#network_types)
-    1. [Management Network](#mgmt_nw)
-    2. [Custom NAT Network](#nat_nw)
-    3. [Isolated Network](#iso_nw)
-3. [Virtual Manchines](#vms)
+2. [User Guide](#usage)
+    1. [Create Topology](#create)
+    2. [Delete Topology](#delete)
+    3. [Verbosity](#verbose)
 4. [JSON Topology Config](#json_conf)
     1. [JSON Network Config](#json_nw)
     2. [JSON Virtual Machine Config](#json_vm)
 
 ## Prerequisites <a name = "prereq"></a>
 
-### Required Packages
-```
-sudo apt-get install -y bridge-utils libvirt-clients libvirt-daemon qemu qemu-kvm libvirt-dev libvirt-daemon-system libguestfs-tools virt-manager libosinfo-bin iptables-persistent python3-dev python3-pip
-```
+Run `./install`
 
-### Add user to appropriate groups
-```
-sudo usermod -a -G libvirt $USER
-sudo usermod -a -G libvirt-qemu $USER
-```
+## User Guide <a name = "usage"></a>
 
-## Networks <a name = "network_types"></a>
-1. Management network
-2. Custom NAT network
-3. Isolated network
+### Installation
+Install from Python Package Index
 
-Libvirt implicitly installs a default NAT network. However libvirt's NAT network automatically inserts iptables rules whether you want them or not — in an order that is difficult to control — unless you disable the default network completely
-
-Disbale libvirt's default network. We will create a Custom NAT Network.
 ```
-virsh net-destroy default
-virsh net-autostart --disable default
+sudo pip3 install topology-deployer
 ```
 
-### Management Network <a name = "mgmt_nw"></a>
-This is a libvirt managed host only network used for SSH connections. During creation of VM, one of the network should be connected to virtual bridge for the management network.
+To install from source
 
-### Custom NAT Network <a name = "nat_nw"></a>
-To overcome the challenges of libvirt's NAT network, we will create a Custom NAT network using four main components: a dummy network interface, a virtual bridge, some iptables rules, and dnsmasq.
+```
+sudo pip3 install .
+```
 
-### Isolated Network <a name = "iso_nw"></a>
-Isolated Network are completely private to guest systems. All the guests on same isolated network will be able to communicate to each other
+### Creating Topologies <a name = "create"></a>
+A JSON cofig is taken as input. Check [here](#json_conf) for guide to define config
 
-## Virtual Machines <a name = "vms"></a>
-For our topology we will create virtual machines using libvirt. There are 2 pre-defined flavors for VMs, which will have configured memory, vcpus and disk size. This can be overriden from the json config if required.
+```
+sudo topology-deployer -c config.json -o create -l INFO
+```
 
-#### PE Virtual Machine
-1. Memory : 16G
-2. vCPUs : 8
-3. Disk : 80G
+To only create networks
 
-#### CE Virtual Machine
-1. Memory : 8G
-2. vCPUs : 4
-3. Disk : 40G
+```
+sudo topology-deployer -c config.json -o create -l INFO --no-vm
+```
 
-## JSON Topology Config <a name = "json_conf"></a>
+To only create virtual machines
+
+```
+sudo topology-deployer -c config.json -o create -l INFO --no-network
+```
+
+### Deleting Topologies <a name = "delete"></a>
+Same JSON cofig used to create topology is taken as input.
+
+```
+sudo topology-deployer -c config.json -o delete -l INFO
+```
+
+### Verbosity <a name = "verbose"></a>
+To print verbose output for created networks
+
+```
+sudo topology-deployer --print-nw -c config.json -o create
+```
+
+To print verbose output for created virtual machines
+
+```
+sudo topology-deployer --print-vm -c config.json -o create
+```
+
+
+## JSON Config <a name = "json_conf">
 The json config to define topologies comprises of 2 sections.
 1. Networks
 2. Virtual Machines
@@ -146,12 +156,6 @@ To define networks for the vm, you have to use the network name as key and provi
 
 ## Sample Topology Configurations
 
-### A two PE and two CE topology
-```
-|-------|      |---------|                |---------|      |-------|
-|  CE1  |======|   PE1   |================|   PE2   |======|  CE2  |
-|       |======|         |================|         |======|       |
-|-------|      |---------|                |---------|      |-------|
-```
+1. [2PE-CE](topologies/2PE-CE.json)
+2. [2PE-2PSWITCH-2CE](topologies/sr-mpls.json)
 
-Topology Config : [2PE-CE.json](topologies/2PE-CE.json)

@@ -25,9 +25,13 @@ pip3 install libvirt-python
 sudo usermod -a -G libvirt $USER
 sudo usermod -a -G libvirt-qemu $USER
 
-sudo mkdir /var/lib/libvirt/images/templates
 wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
 
-sudo mv -i jammy-server-cloudimg-amd64.img /var/lib/libvirt/images/templates/ubuntu-22.04-server.qcow2
+sudo mkdir /var/lib/libvirt/images/templates
+sudo mv -i jammy-server-cloudimg-amd64.img \
+    /var/lib/libvirt/images/templates/ubuntu-22.04-server.qcow2
+
+virsh net-destroy default
+virsh net-autostart --disable default
 
 sudo pip3 install .

@@ -150,7 +150,6 @@ class Network:
         DelIptableRules(self.name_, str(self.network4_))
         DelLinuxBridge(self.name_)
         NAT_NW_BASE.joinpath(self.name_).rmdir()
-        pass
 
     def __delete_libvirt_network(self):
         cmd = "sudo virsh net-destroy {}".format(self.name_)
