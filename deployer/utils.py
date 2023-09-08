@@ -11,22 +11,28 @@ from .globals import OP_CREATE, OP_DELETE
 
 def ProcessArguments() -> str:
     parser = argparse.ArgumentParser(description="Parse topology config")
-    parser.add_argument("-c", "--config", required=True)
-    parser.add_argument("-l", "--log", type=str, choices=["DEBUG", "INFO",
-                                                          "WARNING", "ERROR",
-                                                          "CRITICAL"])
-    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("-c", "--config", required=True,
+                        help="JSON Config file that defines the topology")
+    parser.add_argument("-l", "--log", type=str,
+                        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+                        help="Set the log level")
+    parser.add_argument("--dry-run", action="store_true",
+                        help="Instead of executing, print the commands")
 
     parser.add_argument("-o", "--operation", type=str, required=True,
-                        choices=["create", "delete", "CREATE", "DELETE"])
+                        choices=["create", "delete", "CREATE", "DELETE"],
+                        help="Operation to create or delete topology from the JSON Config")
 
-    parser.add_argument("--recreate-nw", action="store_true")
-    parser.add_argument("--print-nw", action="store_true")
-    parser.add_argument("--print-vm", action="store_true")
+    parser.add_argument("--recreate-nw", action="store_true",
+                        help="[PREVIEW] Recreate the nat network")
+    parser.add_argument("--print-nw", action="store_true", help="Print out created network details")
+    parser.add_argument("--print-vm", action="store_true", help="Print out created VM details")
 
     skip_operation = parser.add_mutually_exclusive_group()
-    skip_operation.add_argument("--no-network", action="store_true")
-    skip_operation.add_argument("--no-vm", action="store_true")
+    skip_operation.add_argument("--no-network", action="store_true",
+                                help="Skip creating networks. Cannot be used with --no-vm")
+    skip_operation.add_argument("--no-vm", action="store_true",
+                                help="Skip creating vms. Cannot be used with --no-network")
 
     args = parser.parse_args()
 
