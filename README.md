@@ -176,5 +176,5 @@ To define networks for the vm, you have to use the network name as key and provi
 
 ## Sample Topology Configurations
 
-1. [2PE-CE](topologies/2PE-CE.json)
+1. [2PE-CE](topologies/evpn-2pe.json)
 2. [2PE-2PSWITCH-2CE](topologies/sr-mpls.json)
