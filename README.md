@@ -38,35 +38,37 @@ optional arguments:
   -h, --help            show this help message and exit
   -c CONFIG, --config CONFIG
                         JSON Config file that defines the topology
+  -o {create,delete,CREATE,DELETE}, --operation {create,delete,CREATE,DELETE}
+                        Operation to create or delete topology from the JSON Config
+  -i {ubuntu,rocky}, --image {ubuntu,rocky}
+                        Choose the base OS image for the VMS
   -l {DEBUG,INFO,WARNING,ERROR,CRITICAL}, --log {DEBUG,INFO,WARNING,ERROR,CRITICAL}
                         Set the log level
   --dry-run             Instead of executing, print the commands
-  -o {create,delete,CREATE,DELETE}, --operation {create,delete,CREATE,DELETE}
-                        Operation to create or delete topology from the JSON Config
   --recreate-nw         [PREVIEW] Recreate the nat network
   --print-nw            Print out created network details
   --print-vm            Print out created VM details
-  --no-network          Skip creating networks. Cannot be used with --no-vm
-  --no-vm               Skip creating vms. Cannot be used with --no-network
+  --no-network          [PREVIEW] Skip creating networks. Cannot be used with --no-vm
+  --no-vm               [PREVIEW] Skip creating vms. Cannot be used with --no-network
 ```
 
 ### Creating Topologies <a name = "create"></a>
 A JSON cofig is taken as input. Check [here](#json_conf) for guide to define config
 
 ```
-sudo topology-deployer -c config.json -o create -l INFO
+sudo topology-deployer -c config.json -o create -i ubuntu -l INFO
 ```
 
-To only create networks
+To only create networks. (This is PREVIEW feature. Not fully tested)
 
 ```
-sudo topology-deployer -c config.json -o create -l INFO --no-vm
+sudo topology-deployer -c config.json -o create -i ubuntu -l INFO --no-vm
 ```
 
-To only create virtual machines
+To only create virtual machines. (This is PREVIEW feature. Not fully tested)
 
 ```
-sudo topology-deployer -c config.json -o create -l INFO --no-network
+sudo topology-deployer -c config.json -o create -i ubuntu -l INFO --no-network
 ```
 
 ### Deleting Topologies <a name = "delete"></a>
@@ -178,3 +180,4 @@ To define networks for the vm, you have to use the network name as key and provi
 
 1. [2PE-CE](topologies/evpn-2pe.json)
 2. [2PE-2PSWITCH-2CE](topologies/sr-mpls.json)
+
