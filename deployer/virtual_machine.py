@@ -1,9 +1,11 @@
+import sys
 import logging
 import yaml
 import ipaddress
 
+import deployer.globals as G
 from .network import Network
-from .globals import LIBVIRT_IMAGES, UBUNTU_TEMPLATE
+from .globals import BASE_OS, LIBVIRT_IMAGES
 from .utils import ExecuteCommand
 
 class VirtualMachine:
@@ -62,11 +64,11 @@ class VirtualMachine:
         cloud_init = {
             "system_info": {
                 "default_user": {
-                    "name": "ubuntu",
-                    "home": "/home/ubuntu"
+                    "name": G.BASE_OS,
+                    "home": "/home/{}".format(G.BASE_OS)
                 },
             },
-            "password": "ubuntu",
+            "password": G.BASE_OS,
             "chpasswd": {
                 "expire": False
             },
@@ -79,17 +81,48 @@ class VirtualMachine:
             yaml.dump(cloud_init, cloud_init_f, sort_keys=False)
             cloud_init_f.write("")
 
-    def __generate_netplan_config(self) -> None:
+    def __get_ubuntu_params(self) -> list:
         network_config = {
             "network": {
                 "version": 2,
                 "ethernets": {}
             }
         }
-        index = 1
         interface_config = network_config["network"]["ethernets"]
+        index = 1
+        intf_fmt = "enp{}s0"
+        return [network_config, interface_config, intf_fmt, index]
+
+    def __get_rocky_params(self) -> list:
+        network_config = {
+            "version": 2,
+            "ethernets": {}
+        }
+        interface_config = network_config["ethernets"]
+        index = 0
+        intf_fmt = "eth{}"
+        return [network_config, interface_config, intf_fmt, index]
+
+    def __get_os_based_params(self) -> list:
+        if G.BASE_OS == "rocky":
+            return self.__get_rocky_params()
+        elif G.BASE_OS == "ubuntu":
+            return self.__get_ubuntu_params()
+
+        return [None, None, None, None]
+
+    def __generate_netplan_config(self) -> None:
+        network_config, interface_config, intf_fmt, index = self.__get_os_based_params()
+
+        if ((network_config is None) or
+            (interface_config is None) or
+            (intf_fmt is None) or
+            (index is None)):
+            logging.critical("Error fetching os based network params")
+            sys.exit(1)
+
         for nw in self.networks_:
-            intf_name = "enp{}s0".format(index)
+            intf_name = intf_fmt.format(index)
             network = self.Topology().GetNetwork(nw)
             nw_type = self.Topology().GetNetworkType(nw)
             ip4 = self.networks_[nw].get("v4", None)
@@ -172,7 +205,7 @@ class VirtualMachine:
 
     def __create_root_disk(self) -> None:
         cmd = "sudo qemu-img convert -f qcow2 -O qcow2 {} {}".format(
-                UBUNTU_TEMPLATE, self.root_disk_)
+                G.OS_IMAGE_TEMPLATE, self.root_disk_)
         ExecuteCommand(cmd)
 
         cmd = "sudo qemu-img resize {} {}".format(self.root_disk_, self.root_disk_sz_)
@@ -198,9 +231,15 @@ class VirtualMachine:
             tmp_nw_cfg = "--network bridge={},model=virtio ".format(nw)
             network_args += tmp_nw_cfg
 
-        cmd = ("sudo virt-install --virt-type kvm --os-variant ubuntu20.04 "
+        os_var = ""
+        if G.BASE_OS == "ubuntu":
+            os_var = "ubuntu20.04"
+        elif G.BASE_OS == "rocky":
+            os_var = "rhel8.0"
+
+        cmd = ("sudo virt-install --virt-type kvm --os-variant {} "
                           "{} {} {} {} {} {} --noautoconsole --import".format(
-                              name_arg, cpu_ram_arg, graphic_arg, root_disK_arg,
+                              os_var, name_arg, cpu_ram_arg, graphic_arg, root_disK_arg,
                               cloud_init_arg, network_args))
 
         ExecuteCommand(cmd)

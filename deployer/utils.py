@@ -5,26 +5,33 @@ import subprocess
 import sys
 
 # from .config import DRY_RUN, NO_NETWORK, NO_VM, PRINT_NETWORK, PRINT_VM
-import deployer.globals as globals
-from .globals import OP_CREATE, OP_DELETE
+import deployer.globals as G
+from .globals import OP_CREATE, OP_DELETE, ROCKY_TEMPLATE, UBUNTU_TEMPLATE
 
 
 def ProcessArguments() -> str:
     parser = argparse.ArgumentParser(description="Parse topology config")
+
     parser.add_argument("-c", "--config", required=True,
                         help="JSON Config file that defines the topology")
+
+    parser.add_argument("-o", "--operation", type=str, required=True,
+                        choices=["create", "delete", "CREATE", "DELETE"], default="create",
+                        help="Operation to create or delete topology from the JSON Config")
+
+    parser.add_argument("-i", "--image", type=str,
+                        choices=["ubuntu", "rocky"], default="ubuntu",
+                        help="Choose the base OS image for the VMS")
+
     parser.add_argument("-l", "--log", type=str,
                         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
                         help="Set the log level")
     parser.add_argument("--dry-run", action="store_true",
                         help="Instead of executing, print the commands")
 
-    parser.add_argument("-o", "--operation", type=str, required=True,
-                        choices=["create", "delete", "CREATE", "DELETE"],
-                        help="Operation to create or delete topology from the JSON Config")
-
     parser.add_argument("--recreate-nw", action="store_true",
                         help="[PREVIEW] Recreate the nat network")
+
     parser.add_argument("--print-nw", action="store_true", help="Print out created network details")
     parser.add_argument("--print-vm", action="store_true", help="Print out created VM details")
 
@@ -43,33 +50,43 @@ def ProcessArguments() -> str:
         logging.basicConfig(level=log_level)
 
     if args.dry_run:
-        globals.DRY_RUN = args.dry_run
+        G.DRY_RUN = args.dry_run
 
     if args.operation.upper() == "CREATE":
-        globals.OP = OP_CREATE
+        G.OP = OP_CREATE
     else:
-        globals.OP = OP_DELETE
+        G.OP = OP_DELETE
 
     if args.no_network:
-        globals.NO_NETWORK = args.no_network
+        G.NO_NETWORK = args.no_network
 
     if args.no_vm:
-        globals.NO_VM = args.no_vm
+        G.NO_VM = args.no_vm
 
     if args.recreate_nw:
-        globals.RECREATE_NW = args.recreate_nw
-        globals.NO_VM = True
+        G.RECREATE_NW = args.recreate_nw
+        G.NO_VM = True
 
     if args.print_nw:
-        globals.PRINT_NETWORK = args.print_nw
+        G.PRINT_NETWORK = args.print_nw
 
     if args.print_vm:
-        globals.PRINT_VM = args.print_vm
+        G.PRINT_VM = args.print_vm
+
+    if args.image.lower() == "ubuntu":
+        G.BASE_OS = "ubuntu"
+        G.OS_IMAGE_TEMPLATE = UBUNTU_TEMPLATE
+    elif args.image.lower() == "rocky":
+        G.BASE_OS = "rocky"
+        G.OS_IMAGE_TEMPLATE = ROCKY_TEMPLATE
+    else:
+        logging.critical("Invalid image argument")
+        sys.exit(1)
 
     return args.config
 
 def ExecuteCommand(cmd: str) -> None:
-    if not globals.DRY_RUN:
+    if not G.DRY_RUN:
         logging.info("Executing command : {}".format(cmd))
         ret = subprocess.call(shlex.split(cmd))
         if ret != 0:
