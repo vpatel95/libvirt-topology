@@ -2,14 +2,14 @@ from pathlib import Path
 
 OP_CREATE = 1
 OP_DELETE = 2
-
 OP = OP_CREATE
+
 DRY_RUN = False
 NO_NETWORK = False
 NO_VM = False
-RECREATE_NW = False
-PRINT_NETWORK = False
-PRINT_VM = False
+
+NETWORK_TYPES = ["nat", "isolated", "management"]
+VM_FLAVORS = ["pe", "ce", "dev"]
 
 LIBVIRT_BASE_PATH = Path('/var/lib/libvirt')
 LIBVIRT_IMAGES = LIBVIRT_BASE_PATH.joinpath('images')

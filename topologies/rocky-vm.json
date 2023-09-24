@@ -1,0 +1,30 @@
+{
+    "version": 2,
+    "networks" : [
+        {
+            "name": "rocky-br1",
+            "type": "nat",
+            "subnet4": "11.12.1.0/24",
+            "subnet6": "1234::11.12.1.0/120"
+        },
+        {
+            "name": "rocky-mgmt1",
+            "type": "management",
+            "subnet4": "11.26.1.0/24"
+        }
+    ],
+    "vms" : [{
+        "name": "rocky-pe1",
+        "flavor": "pe",
+        "vnc_port": 5975,
+        "networks": {
+            "rocky-mgmt1": {
+                "v4": "11.26.1.10"
+            },
+            "rocky-br1": {
+                "v4": "11.12.1.10",
+                "v6": "1234::11.12.1.10"
+            }
+        }
+    }]
+}
