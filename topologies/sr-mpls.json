@@ -1,46 +1,63 @@
 {
-    "networks" : {
-        "nat": [{
+    "version": 2,
+    "networks" : [
+        {
             "name": "sr-br1",
+            "type": "nat",
             "subnet4": "20.20.1.0/24",
             "subnet6": "1234::20.20.1.0/120"
-        }, {
+        },
+        {
             "name": "sr-br2",
+            "type": "nat",
             "subnet4": "20.20.2.0/24",
             "subnet6": "1234::20.20.2.0/120"
-        }, {
+        },
+        {
             "name": "sr-br3",
+            "type": "nat",
             "subnet4": "20.20.3.0/24",
             "subnet6": "1234::20.20.1.0/120"
-        }, {
+        },
+        {
             "name": "sr-br4",
+            "type": "nat",
             "subnet4": "20.20.4.0/24",
             "subnet6": "1234::20.20.2.0/120"
-        }, {
+        },
+        {
             "name": "sr-br5",
+            "type": "nat",
             "subnet4": "20.20.5.0/24",
             "subnet6": "1234::20.20.5.0/120"
-        }, {
+        },
+        {
             "name": "sr-br6",
+            "type": "nat",
             "subnet4": "20.20.6.0/24",
             "subnet6": "1234::20.20.6.0/120"
-        }],
-        "isolated": [{
-            "name": "sr-br-iso1"
-        }, {
-            "name": "sr-br-iso2"
-        }],
-        "management": [{
-            "name": "sr-br-mgmt1",
+        },
+        {
+            "name": "sr-iso1",
+            "type": "isolated"
+        },
+        {
+            "name": "sr-iso2",
+            "type": "isolated"
+        },
+        {
+            "name": "sr-mgmt1",
+            "type": "management",
+            "subnet4": "20.20.6.0/24",
             "subnet4": "20.25.1.0/24"
-        }]
-    },
+        }
+    ],
     "vms" : [{
-        "name": "jcnr-pe1",
+        "name": "sr-pe1",
         "flavor": "pe",
         "vnc_port": 5910,
         "networks": {
-            "sr-br-mgmt1": {
+            "sr-mgmt1": {
                 "v4": "20.25.1.10"
             },
             "sr-br1": {
@@ -51,21 +68,21 @@
                 "v4": "20.20.2.10",
                 "v6": "1234::20.20.2.10"
             },
-            "sr-br-iso1": {
+            "sr-iso1": {
                 "v4": "20.20.14.10",
                 "v6": "1234::20.20.14.10"
             },
-            "sr-br-iso2": {
+            "sr-iso2": {
                 "v4": "20.20.15.10",
                 "v6": "1234::20.20.15.10"
             }
         }
     }, {
-        "name": "jcnr-pe2",
+        "name": "sr-pe2",
         "flavor": "pe",
         "vnc_port": 5920,
         "networks": {
-            "sr-br-mgmt1": {
+            "sr-mgmt1": {
                 "v4": "20.25.1.20"
             },
             "sr-br5": {
@@ -76,21 +93,21 @@
                 "v4": "20.20.6.20",
                 "v6": "1234::20.20.6.20"
             },
-            "sr-br-iso1": {
+            "sr-iso1": {
                 "v4": "20.20.24.10",
                 "v6": "1234::20.20.24.10"
             },
-            "sr-br-iso2": {
+            "sr-iso2": {
                 "v4": "20.20.25.10",
                 "v6": "1234::20.20.25.10"
             }
         }
     }, {
-        "name": "jcnr-pswitch1",
+        "name": "sr-ps1",
         "flavor": "pe",
         "vnc_port": 5914,
         "networks": {
-            "sr-br-mgmt1": {
+            "sr-mgmt1": {
                 "v4": "20.25.1.14"
             },
             "sr-br1": {
@@ -111,11 +128,11 @@
             }
         }
     }, {
-        "name": "jcnr-pswitch2",
+        "name": "sr-ps2",
         "flavor": "pe",
         "vnc_port": 5916,
         "networks": {
-            "sr-br-mgmt1": {
+            "sr-mgmt1": {
                 "v4": "20.25.1.16"
             },
             "sr-br3": {
@@ -136,18 +153,18 @@
             }
         }
     }, {
-        "name": "ce11",
+        "name": "sr-ce11",
         "flavor": "ce",
         "vnc_port": 5911,
         "networks": {
-            "sr-br-mgmt1": {
+            "sr-mgmt1": {
                 "v4": "20.25.1.11"
             },
-            "sr-br-iso1": {
+            "sr-iso1": {
                 "v4": "20.20.14.11",
                 "v6": "1234::20.20.14.11"
             },
-            "sr-br-iso2": {
+            "sr-iso2": {
                 "v4": "20.20.15.11",
                 "v6": "1234::20.20.15.11"
             },
@@ -157,18 +174,18 @@
             }
         }
     }, {
-        "name": "ce21",
+        "name": "sr-ce21",
         "flavor": "ce",
         "vnc_port": 5921,
         "networks": {
-            "sr-br-mgmt1": {
+            "sr-mgmt1": {
                 "v4": "20.25.1.21"
             },
-            "sr-br-iso1": {
+            "sr-iso1": {
                 "v4": "20.20.24.21",
                 "v6": "1234::20.20.24.21"
             },
-            "sr-br-iso2": {
+            "sr-iso2": {
                 "v4": "20.20.25.21",
                 "v6": "1234::20.20.25.21"
             },
