@@ -68,6 +68,7 @@ def ProcessArguments(cli_args):
 
     return args.config
 
+
 def ExecuteCommand(cmd):
     if not G.DRY_RUN:
         logging.info(f"Executing command : {cmd}")
@@ -77,6 +78,7 @@ def ExecuteCommand(cmd):
             sys.exit(ret)
     else:
         logging.debug(f"Dry Run enabled. Command : {cmd}")
+
 
 def ExecuteCommandWithOutput(cmd):
     logging.info(f"Executing command : {cmd}")
