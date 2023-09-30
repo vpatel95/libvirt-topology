@@ -1,4 +1,3 @@
-import json
 import logging
 import sys
 
@@ -14,64 +13,88 @@ class Deployer:
     topology_ = Topology()
 
     def __init__(self, config):
-        with open(config) as conf_file:
-            self.config_ = json.load(conf_file)
-
-        Deployer.__validate_version(self.config_)
-
-        self.__parse_networks()
-        self.__parse_vms()
+        self.config_ = config
     # end __init__
 
-    @staticmethod
-    def __validate_version(config):
-        if config is None:
-            logging.critical(f"Error parsing config file {config}")
-            sys.exit(1)
+    def _is_valid_version(self):
+        if self.config_ is None:
+            logging.error(f"Empty config : {self.config_}")
+            return False
 
-        if config.get("version", None) is None:
+        if self.config_.get("version", None) is None:
             logging.error("This looks like older version of config which is "
                           " supported only by 0.0.x version")
-            sys.exit(1)
+            return False
 
-        if config["version"] != 2:
+        if self.config_["version"] != 2:
             logging.error("This version supports only version 2 of config")
-            sys.exit(1)
-    # end __validate_version
+            return False
 
-    def __parse_networks(self):
+        return True
+    # end _is_valid_version
+
+    def _parse_networks(self):
         nw_configs = self.config_.get("networks", None)
 
         if nw_configs is None:
-            logging.critical("No network config found. Exiting")
-            sys.exit(1)
+            logging.error("No network config found. Exiting")
+            return False
 
         if not isinstance(nw_configs, list):
-            logging.critical("'network' config should be a list")
-            sys.exit(1)
+            logging.error("'network' config should be a list")
+            return False
+
+        if len(nw_configs) == 0:
+            logging.error("'network' config cannot be empty list")
+            return False
 
         for nw_conf in nw_configs:
             name = nw_conf["name"]
             nw = Network(nw_conf)
+            if nw is None:
+                return False
             self.Topology().AddNetwork(name, nw)
-    # end __parse_networks
 
-    def __parse_vms(self):
+        return True
+    # end _parse_networks
+
+    def _parse_vms(self):
         vm_configs = self.config_.get("vms", None)
 
         if vm_configs is None:
-            logging.critical("No VMs config found. Exiting")
-            sys.exit(1)
+            logging.error("No VMs config found. Exiting")
+            return False
 
         if not isinstance(vm_configs, list):
-            logging.critical("'vms' config should be a list")
-            sys.exit(1)
+            logging.error("'vms' config should be a list")
+            return False
+
+        if len(vm_configs) == 0:
+            logging.error("'vms' config cannot be empty list")
+            return False
 
         for vm_conf in vm_configs:
             name = vm_conf["name"]
             vm = VirtualMachine(vm_conf)
+            if vm is None:
+                return False
             self.Topology().AddVm(name, vm)
-    # end __parse_vms
+
+        return True
+    # end _parse_vms
+
+    def ParseConfig(self):
+        if not self._is_valid_version():
+            return False
+
+        if not self._parse_networks():
+            return False
+
+        if not self._parse_vms():
+            return False
+
+        return True
+    # end ParseConfig
 
     def Topology(self):
         return self.topology_
@@ -81,8 +104,11 @@ class Deployer:
 
 
 def topology_deployer():
-    conf_file = ProcessArguments(sys.argv[1:])
-    tDeployer = Deployer(conf_file)
+    config = ProcessArguments(sys.argv[1:])
+    tDeployer = Deployer(config)
+    if not tDeployer.ParseConfig():
+        sys.exit(1)
+
     topology = tDeployer.Topology()
 
     if G.OP == G.OP_CREATE:
@@ -90,5 +116,5 @@ def topology_deployer():
     elif G.OP == G.OP_DELETE:
         topology.Delete()
     else:
-        logging.critical(f"Invalid operation {G.OP}")
+        logging.error(f"Invalid operation {G.OP}")
         sys.exit(1)
