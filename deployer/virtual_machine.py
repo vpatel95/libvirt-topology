@@ -23,9 +23,13 @@ class VirtualMachine:
     root_disk_sz_ = "80G"
     topology_ = Topology()
 
-    def __init__(self, conf):
-        VirtualMachine.__validate_vm_config(conf)
+    def __new__(cls, conf):
+        if not VirtualMachine.__validate_vm_config(conf):
+            return None
+        return super(VirtualMachine, cls).__new__(cls)
+    # end __new__
 
+    def __init__(self, conf):
         self.name_ = conf["name"]
         self.flavor_ = conf["flavor"]
         self.vnc_port_ = int(conf["vnc_port"])
@@ -65,15 +69,15 @@ class VirtualMachine:
     def __has_valid_vm_fields(vm):
         if vm.get("name", None) is None:
             logging.critical("'name' is required key in vm config")
-            sys.exit(4)
+            return False
 
         if vm.get("networks", None) is None:
             logging.critical("'networks' is required key in vm config")
-            sys.exit(4)
+            return False
 
         if vm.get("vnc_port", None) is None:
             logging.critical("'vnc_port' is required key in vm config")
-            sys.exit(4)
+            return False
 
         if vm.get("flavor", None) is None:
             if (vm.get("vcpus", None) is None or
@@ -81,26 +85,28 @@ class VirtualMachine:
                     vm.get("disk", None) is None):
                 logging.critical("'vcpu', 'ram' and 'disk' are mandatory if"
                                  " 'flavor' is not provided")
-                sys.exit(4)
+                return False
         else:
             if vm["flavor"] not in VM_FLAVORS:
                 logging.critical("Invalid VM flavor")
-                sys.exit(4)
+                return False
 
         if vm.get("vcpus", None) is not None:
             if not isinstance(vm["vcpus"], int) or vm["vcpus"] < 1:
                 logging.critical("'vcpu' is expected to be number >= 1")
-                sys.exit(4)
+                return False
 
         if vm.get("ram", None) is not None:
             if not isinstance(vm["ram"], int) or vm["ram"] < 1024:
                 logging.critical("'ram' is expected to be number >= 1024")
-                sys.exit(4)
+                return False
 
         if vm.get("disk", None) is not None:
             if not isinstance(vm["disk"], str):
                 logging.critical("'disk' is expected to be in str format")
-                sys.exit(4)
+                return False
+
+        return True
     # end __has_valid_vm_fields
 
     @staticmethod
@@ -110,10 +116,10 @@ class VirtualMachine:
 
             if network is None:
                 logging.critical(f"Network {name} not found")
-                sys.exit(4)
+                return False
 
             if network.IsIsolated():
-                return
+                return True
 
             try:
                 ip4 = ipaddress.IPv4Address(ips["v4"])
@@ -122,22 +128,29 @@ class VirtualMachine:
                     ip6 = ipaddress.ip_address(ips["v6"])
             except Exception as e:
                 logging.error("Invalid Subnet(s). Please check again : ", e)
-                sys.exit(4)
+                return False
 
             # check if IP in IP Network
             if ip4 not in network.network4_:
                 logging.error(f"{ip4} is not in {str(network.network4_)}")
-                sys.exit(4)
+                return False
             if ip6 and network.network6_:
                 if ip6 not in network.network6_:
                     logging.error(f"{ip6} is not in {str(network.network6_)}")
-                    sys.exit(4)
+                    return False
+
+        return True
     # end __validate_vm_network_config
 
     @staticmethod
     def __validate_vm_config(vm):
-        VirtualMachine.__has_valid_vm_fields(vm)
-        VirtualMachine.__validate_vm_network_config(vm["networks"])
+        if not VirtualMachine.__has_valid_vm_fields(vm):
+            return False
+
+        if not VirtualMachine.__validate_vm_network_config(vm["networks"]):
+            return False
+
+        return True
     # end __validate_vm_config
 
     @staticmethod

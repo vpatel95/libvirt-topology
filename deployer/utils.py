@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 import shlex
 import subprocess
@@ -22,7 +23,7 @@ def ProcessArguments(cli_args):
                         choices=["ubuntu", "rocky"], default="ubuntu",
                         help="Choose the base OS image for the VMS")
 
-    parser.add_argument("-l", "--log", type=str,
+    parser.add_argument("-l", "--log", type=str, default="ERROR",
                         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
                         help="Set the log level")
     parser.add_argument("--dry-run", action="store_true",
@@ -51,10 +52,10 @@ def ProcessArguments(cli_args):
         G.OP = OP_DELETE
 
     if args.skip_network:
-        G.NO_NETWORK = args.no_network
+        G.NO_NETWORK = args.skip_network
 
     if args.skip_vm:
-        G.NO_VM = args.no_vm
+        G.NO_VM = args.skip_vm
 
     if args.image.lower() == "ubuntu":
         G.BASE_OS = "ubuntu"
@@ -66,7 +67,10 @@ def ProcessArguments(cli_args):
         logging.critical("Invalid image argument")
         sys.exit(1)
 
-    return args.config
+    with open(args.config) as conf_file:
+        config = json.load(conf_file)
+
+    return config
 
 
 def ExecuteCommand(cmd):
