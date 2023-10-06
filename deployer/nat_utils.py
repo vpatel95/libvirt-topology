@@ -2,7 +2,6 @@ import random
 
 from .utils import ExecuteCommand, ExecuteCommandWithOutput
 
-
 def CheckForwarding() -> None:
     cmd = "cat /proc/sys/net/ipv4/ip_forward"
     if ExecuteCommandWithOutput(cmd) != "1":
@@ -27,7 +26,6 @@ def GetMacAddress() -> str:
 
     return mac
 
-
 def AddLinuxBridge(name: str, ip4: str, ip6: str, plen4: int, plen6: int) -> None:
     mac_address = GetMacAddress()
     dummy_intf = "{}-nic".format(name)
@@ -41,32 +39,53 @@ def AddLinuxBridge(name: str, ip4: str, ip6: str, plen4: int, plen6: int) -> Non
     ExecuteCommand("sudo ip link set dev {} up".format(dummy_intf))
     ExecuteCommand("sudo ip link set dev {} up".format(name))
 
+def AddIptableRules(name: str, nw4: str) -> None:
+    ExecuteCommand("sudo iptables -t mangle -A POSTROUTING "
+                   "-o {} -p udp -m udp --dport 68 -j CHECKSUM --checksum-fill".format(name))
+    ExecuteCommand("sudo iptables -t nat -A POSTROUTING "
+                   "-s {} -d 224.0.0.0/24 -j RETURN".format(nw4))
+    ExecuteCommand("sudo iptables -t nat -A POSTROUTING "
+                   "-s {} -d 255.255.255.255/32 -j RETURN".format(nw4))
+    ExecuteCommand("sudo iptables -t nat -A POSTROUTING "
+                   "-s {} ! -d {} -p tcp -j MASQUERADE --to-ports 1024-65535".format(nw4, nw4))
+    ExecuteCommand("sudo iptables -t nat -A POSTROUTING "
+                   "-s {} ! -d {} -p udp -j MASQUERADE --to-ports 1024-65535".format(nw4, nw4))
+    ExecuteCommand("sudo iptables -t nat -A POSTROUTING -s {} ! -d {} -j MASQUERADE".format(nw4, nw4))
+    ExecuteCommand("sudo iptables -t filter -A INPUT "
+                   "-i {} -p udp -m udp -m multiport --dports 53,67 -j ACCEPT".format(name))
+    ExecuteCommand("sudo iptables -t filter -A INPUT -i "
+                   "{} -p tcp -m tcp -m multiport --dports 53,67 -j ACCEPT".format(name))
+    ExecuteCommand("sudo iptables -t filter -A FORWARD -d {} -o {} -j ACCEPT".format(nw4, name))
+    ExecuteCommand("sudo iptables -t filter -A FORWARD -s {} -i {} -j ACCEPT".format(nw4, name))
+    ExecuteCommand("sudo iptables -t filter -A FORWARD -i {} -j ACCEPT".format(name))
+    ExecuteCommand("sudo iptables -t filter -A FORWARD -o {} -j ACCEPT".format(name))
+    ExecuteCommand("sudo sh -c 'iptables-save > /etc/iptables/rules.v4'")
 
-def DelLinuxBridge(name):
-    dummy_intf = f"{name}-nic"
-    ExecuteCommand(f"sudo ip link set dev {dummy_intf} down")
-    ExecuteCommand(f"sudo ip link set dev {name} down")
-    ExecuteCommand(f"sudo ip link del {dummy_intf}")
-    ExecuteCommand(f"sudo ip link del {name}")
+def DelLinuxBridge(name: str) -> None:
+    dummy_intf = "{}-nic".format(name)
+    ExecuteCommand("sudo ip link set dev {} down".format(dummy_intf))
+    ExecuteCommand("sudo ip link set dev {} down".format(name))
+    ExecuteCommand("sudo ip link del {}".format(dummy_intf))
+    ExecuteCommand("sudo ip link del {}".format(name))
 
-
-def AddDelIptableRules(op, name, nw4):
-    ExecuteCommand(f"sudo iptables -t mangle -{op} POSTROUTING -o {name} -p udp "
-                   "-m udp --dport 68 -j CHECKSUM --checksum-fill")
-    ExecuteCommand(f"sudo iptables -t nat -{op} POSTROUTING -s {nw4} -d 224.0.0.0/24 -j RETURN")
-    ExecuteCommand(f"sudo iptables -t nat -{op} POSTROUTING -s {nw4} -d "
-                   "255.255.255.255/32 -j RETURN")
-    ExecuteCommand(f"sudo iptables -t nat -{op} POSTROUTING -s {nw4} ! -d {nw4} "
-                   "-p tcp -j MASQUERADE --to-ports 1024-65535")
-    ExecuteCommand(f"sudo iptables -t nat -{op} POSTROUTING -s {nw4} ! -d {nw4} "
-                   "-p udp -j MASQUERADE --to-ports 1024-65535")
-    ExecuteCommand(f"sudo iptables -t nat -{op} POSTROUTING -s {nw4} ! -d {nw4} -j MASQUERADE")
-    ExecuteCommand(f"sudo iptables -t filter -{op} INPUT -i {name} -p udp -m udp "
-                   "-m multiport --dports 53,67 -j ACCEPT")
-    ExecuteCommand(f"sudo iptables -t filter -{op} INPUT -i {name} -p tcp -m tcp "
-                   "-m multiport --dports 53,67 -j ACCEPT")
-    ExecuteCommand(f"sudo iptables -t filter -{op} FORWARD -d {nw4} -o {name} -j ACCEPT")
-    ExecuteCommand(f"sudo iptables -t filter -{op} FORWARD -s {nw4} -i {name} -j ACCEPT")
-    ExecuteCommand(f"sudo iptables -t filter -{op} FORWARD -i {name} -j ACCEPT")
-    ExecuteCommand(f"sudo iptables -t filter -{op} FORWARD -o {name} -j ACCEPT")
+def DelIptableRules(name: str, nw4: str) -> None:
+    ExecuteCommand("sudo iptables -t mangle -D POSTROUTING "
+                   "-o {} -p udp -m udp --dport 68 -j CHECKSUM --checksum-fill".format(name))
+    ExecuteCommand("sudo iptables -t nat -D POSTROUTING "
+                   "-s {} -d 224.0.0.0/24 -j RETURN".format(nw4))
+    ExecuteCommand("sudo iptables -t nat -D POSTROUTING "
+                   "-s {} -d 255.255.255.255/32 -j RETURN".format(nw4))
+    ExecuteCommand("sudo iptables -t nat -D POSTROUTING "
+                   "-s {} ! -d {} -p tcp -j MASQUERADE --to-ports 1024-65535".format(nw4, nw4))
+    ExecuteCommand("sudo iptables -t nat -D POSTROUTING "
+                   "-s {} ! -d {} -p udp -j MASQUERADE --to-ports 1024-65535".format(nw4, nw4))
+    ExecuteCommand("sudo iptables -t nat -D POSTROUTING -s {} ! -d {} -j MASQUERADE".format(nw4, nw4))
+    ExecuteCommand("sudo iptables -t filter -D INPUT "
+                   "-i {} -p udp -m udp -m multiport --dports 53,67 -j ACCEPT".format(name))
+    ExecuteCommand("sudo iptables -t filter -D INPUT -i "
+                   "{} -p tcp -m tcp -m multiport --dports 53,67 -j ACCEPT".format(name))
+    ExecuteCommand("sudo iptables -t filter -D FORWARD -d {} -o {} -j ACCEPT".format(nw4, name))
+    ExecuteCommand("sudo iptables -t filter -D FORWARD -s {} -i {} -j ACCEPT".format(nw4, name))
+    ExecuteCommand("sudo iptables -t filter -D FORWARD -i {} -j ACCEPT".format(name))
+    ExecuteCommand("sudo iptables -t filter -D FORWARD -o {} -j ACCEPT".format(name))
     ExecuteCommand("sudo sh -c 'iptables-save > /etc/iptables/rules.v4'")

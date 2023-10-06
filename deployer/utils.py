@@ -1,5 +1,4 @@
 import argparse
-import json
 import logging
 import shlex
 import subprocess
@@ -9,7 +8,7 @@ import deployer.globals as G
 from .globals import OP_CREATE, OP_DELETE, ROCKY_TEMPLATE, UBUNTU_TEMPLATE
 
 
-def ProcessArguments(cli_args):
+def ProcessArguments() -> str:
     parser = argparse.ArgumentParser(description="Parse topology config")
 
     parser.add_argument("-c", "--config", required=True,
@@ -23,7 +22,7 @@ def ProcessArguments(cli_args):
                         choices=["ubuntu", "rocky"], default="ubuntu",
                         help="Choose the base OS image for the VMS")
 
-    parser.add_argument("-l", "--log", type=str, default="ERROR",
+    parser.add_argument("-l", "--log", type=str,
                         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
                         help="Set the log level")
     parser.add_argument("--dry-run", action="store_true",
@@ -35,7 +34,7 @@ def ProcessArguments(cli_args):
     skip_operation.add_argument("--skip-vm", action="store_true",
                                 help="Skip creating vms. Cannot be used with --skip-network")
 
-    args = parser.parse_args(cli_args)
+    args = parser.parse_args()
 
     if args.log:
         log_level = getattr(logging, args.log.upper(), None)
@@ -52,10 +51,10 @@ def ProcessArguments(cli_args):
         G.OP = OP_DELETE
 
     if args.skip_network:
-        G.NO_NETWORK = args.skip_network
+        G.NO_NETWORK = args.no_network
 
     if args.skip_vm:
-        G.NO_VM = args.skip_vm
+        G.NO_VM = args.no_vm
 
     if args.image.lower() == "ubuntu":
         G.BASE_OS = "ubuntu"
@@ -67,13 +66,9 @@ def ProcessArguments(cli_args):
         logging.critical("Invalid image argument")
         sys.exit(1)
 
-    with open(args.config) as conf_file:
-        config = json.load(conf_file)
+    return args.config
 
-    return config
-
-
-def ExecuteCommand(cmd):
+def ExecuteCommand(cmd: str) -> None:
     if not G.DRY_RUN:
         logging.info(f"Executing command : {cmd}")
         ret = subprocess.call(shlex.split(cmd))
@@ -83,8 +78,7 @@ def ExecuteCommand(cmd):
     else:
         logging.debug(f"Dry Run enabled. Command : {cmd}")
 
-
-def ExecuteCommandWithOutput(cmd):
+def ExecuteCommandWithOutput(cmd: str) -> str:
     logging.info(f"Executing command : {cmd}")
     res = subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if res.returncode != 0:
