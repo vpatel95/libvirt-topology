@@ -33,7 +33,7 @@ class Network:
     def __init__(self, conf):
         self.type_ = conf["type"]
         self.name_ = conf["name"]
-        if self.type_ in ["nat", "management"]:
+        if not self.IsIsolated():
             self._add_v4_network(conf["subnet4"])
             self._add_v6_network(conf.get("subnet6", None))
     # end __init__

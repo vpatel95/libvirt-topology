@@ -1,7 +1,9 @@
+import ipaddress
 import logging
 from socket import AddressFamily
 import unittest
 from unittest import mock
+from unittest.mock import patch
 
 import deployer
 import deployer.topology
@@ -136,3 +138,28 @@ class TestNetwork(unittest.TestCase):
 
         ok = Network._validate_network_conf(self.nw_)
         self.assertFalse(ok)
+
+    def test_add_v4_network(self):
+        v4_nw_conf = {
+            "name": "nw1",
+            "type": "nat",
+            "subnet4": "12.12.12.0/24"
+        }
+        v4_nw = Network(v4_nw_conf)
+        self.assertEqual(v4_nw.network4_, ipaddress.IPv4Network('12.12.12.0/24'))
+        self.assertEqual(v4_nw.ip4_, ipaddress.IPv4Network('12.12.12.0/24')[1])
+        self.assertEqual(v4_nw.network6_, None)
+        self.assertEqual(v4_nw.ip6_, None)
+
+    def test_add_v6_network(self):
+        nw_conf = {
+            "name": "nw1",
+            "type": "nat",
+            "subnet4": "12.12.12.0/24",
+            "subnet6": "1234::12.12.12.0/120"
+        }
+        nw1 = Network(nw_conf)
+        self.assertEqual(nw1.network4_, ipaddress.IPv4Network('12.12.12.0/24'))
+        self.assertEqual(nw1.ip4_, ipaddress.IPv4Network('12.12.12.0/24')[1])
+        self.assertEqual(nw1.network6_, ipaddress.IPv6Network('1234::12.12.12.0/120'))
+        self.assertEqual(nw1.ip6_, ipaddress.IPv6Network('1234::12.12.12.0/120')[1])
