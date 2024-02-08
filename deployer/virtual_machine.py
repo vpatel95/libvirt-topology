@@ -62,7 +62,7 @@ class VirtualMachine:
             self.vcpus_ = int(conf["ram"])
 
         if conf.get("disk", None) is not None:
-            self.root_disk_sz_ = int(conf["disk"])
+            self.root_disk_sz_ = conf["disk"]
     # end __init__
 
     @staticmethod
