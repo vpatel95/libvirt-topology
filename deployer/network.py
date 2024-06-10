@@ -44,16 +44,38 @@ class Network:
             logging.error("Invalid network type in network config")
             return False
 
-        if nw.get("name", None) is None:
-            logging.error("'name' is required key in network config")
+        if not nw.get("name", None):
+            logging.error("'name' is required in network config")
+            return False
+        elif not isinstance(nw["name"], str):
+            logging.error("'name' should be of type string")
             return False
 
+        subnet4 = nw.get("subnet4", None)
+        subnet6 = nw.get("subnet6", None)
         if nw["type"] == "isolated":
+            if subnet4 is not None or subnet6 is not None:
+                logging.error("Subnet(s) not supported for isolated networks")
+                return False
             return True
 
-        if nw.get("subnet4", None) is None:
-            logging.error("'subnet' is required key for nat and management networks")
+        if not subnet4:
+            logging.error("'subnet4' is required for nat and management networks")
             return False
+        elif not isinstance(subnet4, str):
+            logging.error("'subnet4' should be of type string")
+            return False
+
+        if subnet6 is not None:
+            if nw["type"] in ["management"]:
+                logging.error("'subnet6' is not supported for management networks")
+                return False
+            elif not subnet6:
+                logging.error("Invalid 'subnet6' in network config")
+                return False
+            elif not isinstance(subnet6, str):
+                logging.error("'subnet6' should be of type string")
+                return False
 
         return True
     # end _has_valid_network_fields
@@ -90,7 +112,7 @@ class Network:
                 subnet6 = ipaddress.ip_network(nw["subnet6"],
                                                strict=False)
         except ValueError:
-            logging.error("Invalid Subnet(s). Please check again")
+            logging.error(f"Invalid Subnet(s) in {name}. Please check again")
             return False
 
         for interface, addrs in psutil.net_if_addrs().items():

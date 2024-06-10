@@ -27,7 +27,14 @@ class TestVirtualMachine(unittest.TestCase):
             "subnet6": "1234::20.1.1.0/120",
         })
         self.mgmt_conf_ = {"v4": "10.1.1.1"}
-        self.nat_conf_ = {"v4": "20.1.1.1", "v6": "1234::20.1.1.1"}
+        self.nat_conf_ = {
+            "v4": "20.1.1.1",
+            "routes": [{
+                "to": "1.1.1.1",
+                "via": "20.1.1.3"
+            }],
+            "v6": "1234::20.1.1.1"
+        }
         self.iso_conf_ = {"v4": "30.1.1.1", "v6": "1234::30.1.1.1"}
         self.vm_conf_ = {
             "name": "vm1",
@@ -68,7 +75,7 @@ class TestVirtualMachine(unittest.TestCase):
         self.topo_getnw_patcher.stop()
         self.mock_mkdir = self.mkdir_patcher.stop()
 
-    def test_name_validity(self):
+    def test_vm_field_name(self):
         # Test empty name. It should fail
         self.vm_conf_["name"] = ""
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
@@ -88,7 +95,7 @@ class TestVirtualMachine(unittest.TestCase):
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
         self.assertTrue(ok)
 
-    def test_networks_validity(self):
+    def test_vm_field_networks(self):
         # Test empty networks. It should fail
         self.vm_conf_["networks"] = {}
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
@@ -104,7 +111,7 @@ class TestVirtualMachine(unittest.TestCase):
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
         self.assertTrue(ok)
 
-    def test_vnc_port_validity(self):
+    def test_vm_field_vnc_port(self):
         # Test empty vnc_port. It should fail
         self.vm_conf_["vnc_port"] = ""
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
@@ -125,7 +132,7 @@ class TestVirtualMachine(unittest.TestCase):
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
         self.assertTrue(ok)
 
-    def test_flavor_validity(self):
+    def test_vm_field_flavor(self):
         # Test empty flavor. It should pass as vcpus, ram and disk are not empty
         self.vm_conf_["flavor"] = ""
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
@@ -152,7 +159,7 @@ class TestVirtualMachine(unittest.TestCase):
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
         self.assertTrue(ok)
 
-    def test_vcpus_validity(self):
+    def test_vm_field_vcpus(self):
         # Empty vcpu with valid flavor. It should pass
         del self.vm_conf_["vcpus"]
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
@@ -178,7 +185,7 @@ class TestVirtualMachine(unittest.TestCase):
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
         self.assertTrue(ok)
 
-    def test_ram_validity(self):
+    def test_vm_field_ram(self):
         # Empty ram with valid flavor. It should pass
         del self.vm_conf_["ram"]
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
@@ -204,7 +211,7 @@ class TestVirtualMachine(unittest.TestCase):
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
         self.assertTrue(ok)
 
-    def test_disk_validity(self):
+    def test_vm_field_disk(self):
         # Empty disk with valid flavor. It should pass
         del self.vm_conf_["disk"]
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
@@ -224,6 +231,48 @@ class TestVirtualMachine(unittest.TestCase):
         self.vm_conf_["disk"] = "80G"
         ok = VirtualMachine._has_valid_vm_fields(self.vm_conf_)
         self.assertTrue(ok)
+
+    def test_nw_field_types(self):
+        # Test with all types of nw present
+        ok = VirtualMachine._validate_vm_network_config(self.vm_conf_["networks"])
+        self.assertTrue(ok)
+
+        # Test with only nat and isolated present
+        del self.vm_conf_["networks"]["mgmt1"]
+        ok = VirtualMachine._validate_vm_network_config(self.vm_conf_["networks"])
+        self.assertTrue(ok)
+
+        # Test with only mgmt and isolated present
+        self.vm_conf_["networks"]["mgmt1"] = self.mgmt_conf_
+        del self.vm_conf_["networks"]["nat1"]
+        ok = VirtualMachine._validate_vm_network_config(self.vm_conf_["networks"])
+        self.assertTrue(ok)
+
+        # Test with only mgmt and nat present
+        self.vm_conf_["networks"]["nat1"] = self.nat_conf_
+        del self.vm_conf_["networks"]["iso1"]
+        ok = VirtualMachine._validate_vm_network_config(self.vm_conf_["networks"])
+        self.assertTrue(ok)
+
+    def test_nw_field_v4(self):
+        # Test with empty v4 for management network. It should fail
+        self.vm_conf_["networks"]["mgmt1"]["v4"] = ""
+        ok = VirtualMachine._validate_vm_network_config(self.vm_conf_["networks"])
+        self.assertFalse(ok)
+
+        #Test with non string v4 for management network. It should fail
+        self.vm_conf_["networks"]["mgmt1"]["v4"] = 10
+        ok = VirtualMachine._validate_vm_network_config(self.vm_conf_["networks"])
+        self.assertFalse(ok)
+
+    def test_nw_field_v6(self):
+        # Test with v6 for management network. It should fail
+        self.vm_conf_["networks"]["mgmt1"]["v6"] = "1234::1"
+        ok = VirtualMachine._validate_vm_network_config(self.vm_conf_["networks"])
+        self.assertFalse(ok)
+
+    def test_nw_field_routes(self):
+        pass
 
     def test_add_pe_virtual_machine(self):
         self.vm_ = VirtualMachine(self.vm_conf_)

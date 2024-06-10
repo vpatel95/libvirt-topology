@@ -1,0 +1,24 @@
+<mxfile host="Electron" modified="2024-04-21T18:52:52.466Z"
+    agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.16 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36"
+    etag="Jn3_KNP23sdxdWY-BK48" version="22.1.16" type="device">
+    <diagram id="tXaP7wr8Wuc8PtstvcKB" name="Network Topology">
+        <mxGraphModel dx="1242" dy="796" grid="1" gridSize="10" guides="1" tooltips="1" connect="1"
+            arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0"
+            shadow="0">
+            <mxCell id="mgmt1" parent="1" vertex="1">
+                <mxGeometry x="280" y="160" width="120" height="40">mgmt1</mxGeometry>
+            </mxCell>
+            <mxCell id="mgmt2" parent="1" vertex="1">
+                <mxGeometry x="280" y="160" width="120" height="40">mgmt2</mxGeometry>
+            </mxCell>
+            <mxCell id="master" parent="1" vertex="1">
+                <mxGeometry x="680" y="160" width="120" height="40">master</mxGeometry>
+            </mxCell>
+            <mxCell id="master-mgmt1" parent="1" edge="1" source="master" target="mgmt1" />
+            <mxCell id="kubelet1" parent="1" vertex="1">
+                <mxGeometry x="680" y="160" width="120" height="40">kubelet1</mxGeometry>
+            </mxCell>
+            <mxCell id="kubelet1-mgmt1" parent="1" edge="1" source="kubelet1" target="mgmt1" />
+        </mxGraphModel>
+    </diagram>
+</mxfile>

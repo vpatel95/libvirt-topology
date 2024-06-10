@@ -135,20 +135,39 @@ class VirtualMachine:
             try:
                 ip4 = ipaddress.IPv4Address(ips["v4"])
                 ip6 = None
+                routes = None
                 if ips.get("v6", None) is not None:
                     ip6 = ipaddress.ip_address(ips["v6"])
+                if ips.get("routes", None) is not None:
+                    routes = ips["routes"]
             except Exception as e:
-                logging.error("Invalid Subnet(s). Please check again : ", e)
+                logging.error(f"Invalid Subnet(s). Please check again : {e}")
                 return False
 
             # check if IP in IP Network
             if ip4 not in network.network4_:
                 logging.error(f"{ip4} is not in {str(network.network4_)}")
                 return False
-            if ip6 and network.network6_:
-                if ip6 not in network.network6_:
-                    logging.error(f"{ip6} is not in {str(network.network6_)}")
+            if ip6:
+                if network.network6_:
+                    if ip6 not in network.network6_:
+                        logging.error(f"{ip6} is not in {str(network.network6_)}")
+                        return False
+                elif network.IsManagement():
+                    logging.error(f"IPv6 not supported in management network")
                     return False
+                else:
+                    logging.error(f"IPv6 not supported in {name} network")
+                    return False
+
+            if routes:
+                for route in routes:
+                    try:
+                        to = ipaddress.IPv4Address(route["to"])
+                        via = ipaddress.IPv4Address(route["via"])
+                    except Exception as e:
+                        logging.error(f"Invalid IPv4 address in routes : {e}")
+                        return False
 
         return True
     # end _validate_vm_network_config
@@ -224,7 +243,7 @@ class VirtualMachine:
         return [None, None, None, None]
     # end __get_os_based_params
 
-    def __generate_netplan_config(self):
+    def _generate_netplan_config(self):
         network_config, interface_config, intf_fmt, index = self.__get_os_based_params()
 
         if ((network_config is None) or
@@ -256,7 +275,7 @@ class VirtualMachine:
         with open(self.network_data_cfg_, "w") as nw_config_f:
             nw_config_f.write("#network-config\n")
             yaml.dump(network_config, nw_config_f, sort_keys=False)
-    # end __generate_netplan_config
+    # end _generate_netplan_config
 
     def __generate_mgmt_config(self, ip4, nw):
         addr = ""
@@ -366,7 +385,7 @@ class VirtualMachine:
         logging.info(f"Creating Virtual Machine : {self.name_}")
 
         self.__generate_cloud_init_config()
-        self.__generate_netplan_config()
+        self._generate_netplan_config()
         self.__create_root_disk()
         self.__generate_cloud_init_iso()
 
