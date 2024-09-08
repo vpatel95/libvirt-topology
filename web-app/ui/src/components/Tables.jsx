@@ -3,9 +3,9 @@ import {
   Card,
   Table,
 } from "reactstrap";
-import {NetworkDetailRow, NetworkSummaryRow} from "components/Networks";
-import {TopologyDetailRow, TopologySummaryRow} from "components/Topologies";
-import {VmDetailRow, VmSummaryRow} from "components/VirtualMachines";
+import {NetworkDetailRow, NetworkSummaryRow} from "/src/components/Networks";
+import {TopologyDetailRow, TopologySummaryRow} from "/src/components/Topologies";
+import {VmDetailRow, VmSummaryRow} from "/src/components/VirtualMachines";
 import {CardHeaderWithButton} from "./Cards";
 
 export const BaseTable = ({title, headers, row}) => {

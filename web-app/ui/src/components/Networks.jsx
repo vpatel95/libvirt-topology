@@ -8,8 +8,8 @@ import {
 } from 'reactstrap';
 import {Link} from 'react-router-dom';
 
-import { getNetworkType } from 'utils';
-import {NetworkAPI} from 'services/api';
+import { getNetworkType } from '/src/utils';
+import {NetworkAPI} from '/src/services/api';
 
 export const NetworkDetail = ({network, attachedVms}) => {
   return (

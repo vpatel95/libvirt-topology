@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import {SessionStore} from "services/store";
+import {SessionStore} from "/src/services/store";
 
 export const AuthWrapper = () => {
   const user = SessionStore.getUser();

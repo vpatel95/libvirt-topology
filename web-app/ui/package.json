@@ -2,14 +2,14 @@
   "name": "topology-deployer",
   "version": "0.1.0",
   "private": true,
-  "main": "index.js",
+  "main": "index.jsx",
   "author": "Creative Tim",
   "license": "MIT",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "start": "vite start",
+    "build": "vite build",
+    "preview": "vite preview",
+    "host": "vite --host",
     "install:clean": "rm -rf node_modules/ && rm -rf package-lock.json && npm install && npm start",
     "compile:scss": "sass src/assets/scss/argon-dashboard-react.scss src/assets/css/argon-dashboard-react.css",
     "minify:scss": "sass src/assets/scss/argon-dashboard-react.scss src/assets/css/argon-dashboard-react.min.css --style compressed",
@@ -38,19 +38,16 @@
     "react-datetime": "3.2.0",
     "react-dom": "18.2.0",
     "react-router-dom": "6.21.2",
-    "react-scripts": "5.0.1",
     "react-toastify": "^9.1.3",
     "reactstrap": "9.1.5",
     "sass": "1.69.5"
   },
   "devDependencies": {
-    "ajv": "^8.17.1",
+    "@vitejs/plugin-react": "^4.3.1",
     "gulp": "4.0.2",
-    "gulp-append-prepend": "1.0.9"
-  },
-  "optionalDependencies": {
-    "eslint-plugin-flowtype": "8.0.3",
-    "typescript": "5.3.3"
+    "gulp-append-prepend": "1.0.9",
+    "vite": "^5.4.3",
+    "typescript": "5.4.5"
   },
   "overrides": {
     "svgo": "3.0.2",

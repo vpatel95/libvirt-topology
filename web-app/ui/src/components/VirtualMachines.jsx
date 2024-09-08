@@ -7,8 +7,8 @@ import {
   Row
 } from 'reactstrap';
 import {Link} from 'react-router-dom';
-import {getMemory, getFlavor} from 'utils';
-import {VmAPI} from 'services/api';
+import {getMemory, getFlavor} from '/src/utils';
+import {VmAPI} from '/src/services/api';
 
 export const VmDetail = ({vm}) => {
   return (

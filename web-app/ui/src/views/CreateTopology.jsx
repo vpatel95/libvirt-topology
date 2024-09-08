@@ -10,8 +10,8 @@ import {
 import {Form, redirect, useNavigate} from 'react-router-dom';
 import {toast} from 'react-toastify';
 
-import {CardHeaderSimple} from 'components/Cards';
-import {TopologyAPI} from "services/api";
+import {CardHeaderSimple} from '/src/components/Cards';
+import {TopologyAPI} from "/src/services/api";
 
 export const createTopologyAction = async ({request}) => {
   const formData = Object.fromEntries(await request.formData());

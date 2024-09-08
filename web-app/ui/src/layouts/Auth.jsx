@@ -4,7 +4,7 @@ import { useLocation, Outlet } from "react-router-dom";
 import { Container, Row, Col } from "reactstrap";
 
 // core components
-import AuthNavbar from "components/Navbars/AuthNavbar.js";
+import AuthNavbar from "/src/components/Navbars/AuthNavbar";
 
 const Auth = (props) => {
   const mainContent = React.useRef(null);

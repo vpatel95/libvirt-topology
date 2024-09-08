@@ -3,8 +3,8 @@ import { Container, Row } from 'reactstrap';
 import { useLoaderData, useLocation } from 'react-router-dom';
 import {toast} from 'react-toastify';
 
-import { TopologyAPI } from 'services/api';
-import { TopologyNetworkDetail, TopologyVmDetail } from 'components/Topologies'
+import { TopologyAPI } from '/src/services/api';
+import { TopologyNetworkDetail, TopologyVmDetail } from '/src/components/Topologies'
 
 export const loader = async ({params}) => {
   const data = await TopologyAPI.get(params.topologyId)

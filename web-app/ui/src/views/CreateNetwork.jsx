@@ -10,9 +10,9 @@ import {
 } from "reactstrap";
 import {toast} from 'react-toastify';
 
-import {CardHeaderSimple} from "components/Cards";
-import {NetworkAPI, UserAPI} from "services/api";
-import {SessionStore} from "services/store";
+import {CardHeaderSimple} from "/src/components/Cards";
+import {NetworkAPI, UserAPI} from "/src/services/api";
+import {SessionStore} from "/src/services/store";
 
 const loader = async () => {
   const user = SessionStore.getUser();

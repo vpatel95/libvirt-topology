@@ -8,8 +8,8 @@ import {
 } from 'reactstrap';
 import {useLoaderData} from "react-router-dom";
 
-import {VmDetail} from "components/VirtualMachines";
-import {VmAPI} from "services/api";
+import {VmDetail} from "/src/components/VirtualMachines";
+import {VmAPI} from "/src/services/api";
 
 const loader = async ({params}) => {
   const data = await VmAPI.get(params.vmId)

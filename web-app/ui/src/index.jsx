@@ -10,58 +10,58 @@ import {
 } from "react-router-dom";
 import {ToastContainer} from "react-toastify";
 
-import "assets/plugins/nucleo/css/nucleo.css";
+import "/src/assets/plugins/nucleo/css/nucleo.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import "assets/css/argon-dashboard-react.css";
+import "/src/assets/css/argon-dashboard-react.css";
 import "react-toastify/dist/ReactToastify.css";
 
-import UserLayout from "layouts/User";
-import AuthLayout from "layouts/Auth";
+import UserLayout from "/src/layouts/User";
+import AuthLayout from "/src/layouts/Auth";
 
-import Login from "views/Login";
-import Register from "views/Register";
-import Profile from "views/Profile";
+import Login from "/src/views/Login";
+import Register from "/src/views/Register";
+import Profile from "/src/views/Profile";
 import {
   Dashboard,
   loader as dashboardLoader
-} from "views/Dashboard";
+} from "/src/views/Dashboard";
 import {
   Topologies,
   loader as topologiesLoader,
-} from "views/Topologies";
+} from "/src/views/Topologies";
 import {
   Topology,
   loader as topologyLoader,
-} from "views/Topology";
-import { TopologyCreate, createTopologyAction } from "views/CreateTopology";
+} from "/src/views/Topology";
+import { TopologyCreate, createTopologyAction } from "/src/views/CreateTopology";
 import {
   Networks,
   loader as networksLoader,
-} from "views/Networks";
+} from "/src/views/Networks";
 import {
   Network,
   loader as networkLoader,
-} from "views/Network";
+} from "/src/views/Network";
 import {
   NetworkCreate,
   loader as createNetworkLoader,
   action as createNetworkAction,
-} from "views/CreateNetwork";
+} from "/src/views/CreateNetwork";
 import {
   VirtualMachines,
   loader as vmsLoader,
-} from "views/VirtualMachines";
+} from "/src/views/VirtualMachines";
 import {
   VirtualMachine,
   loader as vmLoader,
-} from "views/VirtualMachine";
+} from "/src/views/VirtualMachine";
 import {
   CreateVirtualMachine,
   loader as createVmLoader,
   action as createVmAction,
-} from "views/CreateVirtualMachine";
-import { AuthWrapper } from "wrapper/AuthWrapper";
-import { setupInterceptors } from "services/api";
+} from "/src/views/CreateVirtualMachine";
+import { AuthWrapper } from "/src/wrapper/AuthWrapper";
+import { setupInterceptors } from "/src/services/api";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 

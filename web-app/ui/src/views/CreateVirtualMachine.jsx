@@ -6,10 +6,10 @@ import {
 } from 'reactstrap';
 import { useLoaderData, useLocation } from 'react-router-dom';
 
-import {CardHeaderSimple} from 'components/Cards';
-import {CreateVmForm} from 'components/Forms';
-import {SessionStore} from 'services/store';
-import { UserAPI } from 'services/api';
+import {CardHeaderSimple} from '/src/components/Cards';
+import {CreateVmForm} from '/src/components/Forms';
+import {SessionStore} from '/src/services/store';
+import { UserAPI } from '/src/services/api';
 
 const loader = async () => {
   const user = SessionStore.getUser();

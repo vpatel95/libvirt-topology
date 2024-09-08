@@ -11,6 +11,8 @@ import {
   Col,
 } from "reactstrap";
 
+import brandIcon from '/src/assets/img/brand/argon-react.png';
+
 const AdminNavbar = () => {
   return (
     <>
@@ -29,7 +31,7 @@ const AdminNavbar = () => {
                   <Link to="/">
                     <img
                       alt="..."
-                      src={require("../../assets/img/brand/argon-react.png")}
+                      src={brandIcon}
                     />
                   </Link>
                 </Col>

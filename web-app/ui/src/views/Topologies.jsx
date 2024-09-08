@@ -5,9 +5,9 @@ import {
 } from 'reactstrap';
 import {useLoaderData} from 'react-router-dom';
 
-import {TopologyTable} from 'components/Tables';
-import {UserAPI} from 'services/api';
-import {SessionStore} from 'services/store';
+import {TopologyTable} from '/src/components/Tables';
+import {UserAPI} from '/src/services/api';
+import {SessionStore} from '/src/services/store';
 
 const loader = async () => {
   const user = SessionStore.getUser();

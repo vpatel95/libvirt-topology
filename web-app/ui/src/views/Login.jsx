@@ -15,8 +15,10 @@ import {
 
 import {useLocation, useNavigate} from 'react-router-dom';
 import {toast} from 'react-toastify';
-import {AuthAPI} from 'services/api';
-import { SessionStore } from 'services/store';
+import githubIcon from '/src/assets/img/icons/common/github.svg';
+import googleIcon from '/src/assets/img/icons/common/google.svg';
+import {AuthAPI} from '/src/services/api';
+import { SessionStore } from '/src/services/store';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -85,10 +87,7 @@ const Login = () => {
                 <span className="btn-inner--icon">
                   <img
                     alt="..."
-                    src={
-                      require("assets/img/icons/common/github.svg")
-                        .default
-                    }
+                    src={githubIcon}
                   />
                 </span>
                 <span className="btn-inner--text">Github</span>
@@ -103,10 +102,7 @@ const Login = () => {
                 <span className="btn-inner--icon">
                   <img
                     alt="..."
-                    src={
-                      require("assets/img/icons/common/google.svg")
-                        .default
-                    }
+                    src={googleIcon}
                   />
                 </span>
                 <span className="btn-inner--text">Google</span>

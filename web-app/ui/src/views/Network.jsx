@@ -2,8 +2,8 @@ import {useState} from "react";
 import {useLoaderData} from "react-router-dom";
 import {Card, CardBody, CardHeader, Container, Row} from "reactstrap";
 
-import {NetworkDetail} from "components/Networks";
-import {NetworkAPI} from "services/api";
+import {NetworkDetail} from "/src/components/Networks";
+import {NetworkAPI} from "/src/services/api";
 
 const loader = async ({params}) => {
   let data = {};

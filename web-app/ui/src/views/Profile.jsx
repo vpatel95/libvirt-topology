@@ -11,8 +11,8 @@ import {
   Col,
 } from "reactstrap";
 // core components
-import UserHeader from "components/Headers/UserHeader.js";
-import {SessionStore} from "services/store";
+import UserHeader from "/src/components/Headers/UserHeader";
+import {SessionStore} from "/src/services/store";
 
 const Profile = () => {
   const { user } = SessionStore.getUser();

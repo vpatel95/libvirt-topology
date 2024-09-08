@@ -4,10 +4,10 @@ import {
   Container,
   Row,
 } from 'reactstrap';
-import {VirtualMachineTable} from 'components/Tables';
 import {useLoaderData} from 'react-router-dom';
-import {UserAPI} from 'services/api';
-import {SessionStore} from 'services/store';
+import {VirtualMachineTable} from '/src/components/Tables';
+import {UserAPI} from '/src/services/api';
+import {SessionStore} from '/src/services/store';
 
 const loader = async () => {
   const user = SessionStore.getUser();

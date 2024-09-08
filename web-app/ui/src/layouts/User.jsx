@@ -1,9 +1,9 @@
 import React from "react";
 import { useLocation, Outlet } from "react-router-dom";
 
-import UserNavbar from "components/Navbars/UserNavbar";
-import Sidebar from "components/Sidebar/Sidebar";
-import {SessionStore} from "services/store";
+import UserNavbar from "/src/components/Navbars/UserNavbar";
+import Sidebar from "/src/components/Sidebar/Sidebar";
+import {SessionStore} from "/src/services/store";
 
 const UserLayout = (props) => {
   const user = SessionStore.getUser();

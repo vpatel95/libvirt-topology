@@ -2,10 +2,10 @@ import {useState} from 'react';
 import { Container, Row, Col } from 'reactstrap';
 import {useLoaderData} from 'react-router-dom';
 
-import Header from 'components/Headers/Header.js';
-import { TopologyTable, NetworkTable, VirtualMachineTable } from 'components/Tables';
-import {UserAPI} from 'services/api';
-import {SessionStore} from 'services/store';
+import Header from '/src/components/Headers/Header';
+import { TopologyTable, NetworkTable, VirtualMachineTable } from '/src/components/Tables';
+import {UserAPI} from '/src/services/api';
+import {SessionStore} from '/src/services/store';
 
 export const loader = async () => {
   const user = SessionStore.getUser();

@@ -10,8 +10,8 @@ import {
 } from 'reactstrap';
 import {Link, useNavigate, useParams} from 'react-router-dom';
 import {toast} from 'react-toastify';
-import {TopologyAPI} from 'services/api';
-import { getMemory, getFlavor, getNetworkType } from 'utils';
+import {TopologyAPI} from '/src/services/api';
+import { getMemory, getFlavor, getNetworkType } from '/src/utils';
 
 export const TopologyNetworkDetail = (props) => {
 
