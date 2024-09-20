@@ -2,6 +2,7 @@ import sys
 import logging
 import yaml
 import ipaddress
+from pathlib import Path
 
 import deployer.globals as G
 from deployer.globals import LIBVIRT_IMAGES, VM_FLAVORS
@@ -21,6 +22,7 @@ class VirtualMachine:
     vcpus_ = 8
     ram_ = 16384
     root_disk_sz_ = "80G"
+    base_image_ = ""
     topology_ = Topology()
 
     def __new__(cls, conf):
@@ -31,7 +33,8 @@ class VirtualMachine:
 
     def __init__(self, conf):
         self.name_ = conf["name"]
-        self.flavor_ = conf["flavor"]
+        self.base_image_ = conf.get("base_image", G.OS_IMAGE_TEMPLATE)
+        self.flavor_ = conf.get("flavor", "")
         self.vnc_port_ = int(conf["vnc_port"])
         self.libvirt_vm_base = LIBVIRT_IMAGES.joinpath(self.name_)
         self.user_data_cfg_ = self.libvirt_vm_base.joinpath("user-data.cfg")
@@ -71,6 +74,15 @@ class VirtualMachine:
         if not name or not isinstance(name, str):
             logging.critical("'name' is required key in vm config")
             return False
+
+        base_image = vm.get("base_image", None)
+        if base_image:
+            if not isinstance(base_image, str):
+                logging.critical("'base_image' must be a string")
+                return False
+            if not Path(base_image).is_file():
+                logging.critical(f"'base_image' file does not exist: {base_image}")
+                return False
 
         networks = vm.get("networks", None)
         if not networks or not isinstance(networks, dict):
@@ -155,6 +167,9 @@ class VirtualMachine:
 
     @staticmethod
     def _validate_vm_config(vm):
+        if G.NO_VM:
+            return True
+
         if not VirtualMachine._has_valid_vm_fields(vm):
             return False
 
@@ -324,7 +339,7 @@ class VirtualMachine:
     # end __generate_iso_config
 
     def __create_root_disk(self):
-        cmd = f"sudo qemu-img convert -f qcow2 -O qcow2 {G.OS_IMAGE_TEMPLATE} {self.root_disk_}"
+        cmd = f"sudo qemu-img convert -f qcow2 -O qcow2 {self.base_image_} {self.root_disk_}"
         ExecuteCommand(cmd)
 
         cmd = f"sudo qemu-img resize {self.root_disk_} {self.root_disk_sz_}"
