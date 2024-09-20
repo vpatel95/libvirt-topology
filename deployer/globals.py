@@ -7,6 +7,7 @@ OP = OP_CREATE
 DRY_RUN = False
 NO_NETWORK = False
 NO_VM = False
+REBOOT_RECOVERY = False
 
 NETWORK_TYPES = ["nat", "isolated", "management"]
 VM_FLAVORS = ["pe", "ce", "dev"]
