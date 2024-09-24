@@ -30,6 +30,8 @@ def ProcessArguments(cli_args):
                         help="Instead of executing, print the commands")
 
     skip_operation = parser.add_mutually_exclusive_group()
+    skip_operation.add_argument("--reboot-recovery", action="store_true",
+                                help="Recover topology after server reboot")
     skip_operation.add_argument("--skip-network", action="store_true",
                                 help="Skip creating networks. Cannot be used with --skip-vm")
     skip_operation.add_argument("--skip-vm", action="store_true",
@@ -56,6 +58,9 @@ def ProcessArguments(cli_args):
 
     if args.skip_vm:
         G.NO_VM = args.skip_vm
+
+    if args.reboot_recovery:
+        G.REBOOT_RECOVERY = args.reboot_recovery
 
     if args.image.lower() == "ubuntu":
         G.BASE_OS = "ubuntu"

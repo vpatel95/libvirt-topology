@@ -72,12 +72,19 @@ class Network:
         name = nw["name"]
         ntype = nw["type"]
 
+        # In case of recovery after reboot, we just need to recreate Nat networks.
+        if G.REBOOT_RECOVERY:
+            if Network.IsLibvirtNetwork(ntype):
+                logging.debug(f"Reboot recovery not required for libvirt network {name}")
+                return True
+
+
         if len(name) > 12:
             logging.error(f"Max length for name is 12 characters : {name}")
             return False
 
+        # Check if interface with name already exists
         interfaces = psutil.net_if_addrs()
-
         if name in interfaces:
             logging.error(f"Network with name {name} is already present")
             return False
@@ -158,7 +165,9 @@ class Network:
 
         AddLinuxBridge(self.name_, str(self.ip4_), str(self.ip6_),
                        self.plen4_, self.plen6_)
-        AddDelIptableRules("A", self.name_, str(self.network4_))
+        # Since iptables are persisted
+        if not G.REBOOT_RECOVERY:
+            AddDelIptableRules("A", self.name_, str(self.network4_))
     # end _create_nat_network
 
     def _create_management_network(self):
@@ -222,7 +231,7 @@ class Network:
     def Delete(self):
         if self.IsNat():
             self._delete_nat_network()
-        elif self.IsLibvirtNetwork():
+        elif Network.IsLibvirtNetwork(self.type_):
             self._delete_libvirt_network()
         else:
             logging.error(f"Unknown network type {self.type_}")
@@ -233,9 +242,11 @@ class Network:
         if self.IsNat():
             self._create_nat_network()
         elif self.IsIsolated():
-            self._create_isolated_network()
+            if not G.REBOOT_RECOVERY:
+                self._create_isolated_network()
         elif self.IsManagement():
-            self._create_management_network()
+            if not G.REBOOT_RECOVERY:
+                self._create_management_network()
         else:
             logging.error(f"Unknown network type {self.type_}")
             sys.exit(3)
@@ -257,8 +268,9 @@ class Network:
         return self.type_ == "nat"
     # end IsNat
 
-    def IsLibvirtNetwork(self):
-        return self.type_ in ["isolated", "management"]
+    @staticmethod
+    def IsLibvirtNetwork(ntype):
+        return ntype in ["isolated", "management"]
     # end IsLibvirtNetwork
 
     def __str__(self):
