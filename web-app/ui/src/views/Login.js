@@ -1,22 +1,3 @@
-/*!
-
-=========================================================
-* Argon Dashboard React - v1.2.3
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
-// reactstrap components
 import { useState} from 'react';
 import {
   Button,
@@ -32,18 +13,23 @@ import {
   Col,
 } from "reactstrap";
 
-import {Navigate} from 'react-router-dom';
-import AuthService from 'services/auth';
+import {useLocation, useNavigate} from 'react-router-dom';
+import {toast} from 'react-toastify';
+import {AuthAPI} from 'services/api';
+import { SessionStore } from 'services/store';
 
 const Login = () => {
-  const [redirect, setRedirect] = useState(null);
-  const [loginData, setLoginData] = useState({
-    username: "",
-    password: "",
-  });
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const from = location.state?.from?.pathname || "/dashboard";
+
+  const initialData = {
+    username: '',
+    password: '',
+  };
+
+  const [loginData, setLoginData] = useState(initialData);
 
   function handleInputChange(e) {
     const { name, value } = e.target;
@@ -57,36 +43,25 @@ const Login = () => {
 
   function handleLogin(e) {
     e.preventDefault();
+
     const { username, password } = loginData;
 
-    setLoading(true);
-
-    AuthService.login(username, password).then(
-      () => {
-        setRedirect("/user/dashboard");
-      },
-      error => {
+    AuthAPI.login(username, password).then(res => {
+      const accessToken = res?.data?.token;
+      const user = res?.data?.user;
+      SessionStore.setToken(accessToken);
+      SessionStore.setUser(user);
+      navigate(from, { replace: true});
+    }, error => {
+        console.error(error);
         const errMsg =
-          (error.response &&
-            error.response.data &&
-            error.response.data.message) ||
-          error.message ||
-          error.toString();
-
-        setMessage(errMsg);
-      }
-    );
-
-    setLoading(false);
-
-    // [TODO]: Supress warnings. Remove later
-    console.log(message, loading);
-  }
-
-  if (redirect) {
-    return (
-      <Navigate to={redirect} />
-    );
+          (error?.response?.data?.message) ||
+            error.message ||
+            error.toString();
+        // TODO: Mask the API error
+        toast.error("2 : ", errMsg);
+        setLoginData(initialData);
+    })
   }
 
   return (

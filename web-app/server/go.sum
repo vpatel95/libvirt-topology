@@ -72,6 +72,8 @@ github.com/ugorji/go/codec v1.2.11 h1:BMaWp1Bb6fHwEtbplGBGJ498wD+LKlNSl25MjdZY4d
 github.com/ugorji/go/codec v1.2.11/go.mod h1:UNopzCgEMSXjBc6AOMqYvWC1ktqTAfzJZUZgYf6w6lg=
 github.com/vpatel95/session-manager v0.1.1 h1:wu5T3E4N6w29VXatI1nwLPVuEV0LqQnnwK+hngIewZo=
 github.com/vpatel95/session-manager v0.1.1/go.mod h1:1IY0gAsv3wg8JzctaCMH/Uw3hRXilnkNGRVbNBQHy5I=
+github.com/vpatel95/session-manager v0.2.0 h1:ovKRP7KgCxdV41KTBhKBC6dq+5vDJ1w/moRB3i7Tvzk=
+github.com/vpatel95/session-manager v0.2.0/go.mod h1:1IY0gAsv3wg8JzctaCMH/Uw3hRXilnkNGRVbNBQHy5I=
 golang.org/x/arch v0.0.0-20210923205945-b76863e36670/go.mod h1:5om86z9Hs0C8fWVUuoMHwpExlXzs5Tkyp9hOrfG7pp8=
 golang.org/x/arch v0.4.0 h1:A8WCeEWhLwPBKNbFi5Wv5UTCBx5zzubnXDlMOFAzFMc=
 golang.org/x/arch v0.4.0/go.mod h1:5om86z9Hs0C8fWVUuoMHwpExlXzs5Tkyp9hOrfG7pp8=

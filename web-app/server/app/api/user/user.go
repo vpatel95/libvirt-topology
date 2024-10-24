@@ -28,23 +28,6 @@ var (
 	sessionManager = globals.SessionManager
 )
 
-func index(c *gin.Context) {
-	var err error
-	var users []User
-
-	if users, err = model.GetUsers(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"message": "success",
-		"users":   users,
-	})
-}
-
 func get(c *gin.Context) {
 	var err error
 	var user *User
@@ -52,14 +35,15 @@ func get(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if user, err = model.GetUserByID(uint(id)); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "success",
-		"users":   user,
+		"status": "success",
+		"data":   user,
 	})
 }
 
@@ -69,7 +53,8 @@ func update(c *gin.Context) {
 
 	if err = c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": errors.New("Invalid request parameters"),
+			"status": "failure",
+			"data":   errors.New("Invalid request parameters"),
 		})
 		return
 	}
@@ -77,14 +62,15 @@ func update(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if err = model.UpdateUser(uint(id), user); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "success",
-		"data":    user.Serialize(),
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data":   user.Serialize(),
 	})
 }
 
@@ -101,21 +87,23 @@ func getUserTopologies(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if user, err = model.GetUserByID(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
 	if topologies, err = user.GetTopologies(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "success",
-		"data":    topologies,
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data":   topologies,
 	})
 }
 
@@ -127,21 +115,23 @@ func getUserNetworks(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if user, err = model.GetUserByID(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
 	if networks, err = user.GetNetworks(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "success",
-		"data":    networks,
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data":   networks,
 	})
 }
 
@@ -153,20 +143,22 @@ func getUserVms(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if user, err = model.GetUserByID(uint(id)); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
 	if vms, err = user.GetVirtualMachines(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "success",
-		"data":    vms,
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data":   vms,
 	})
 }

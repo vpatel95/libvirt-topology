@@ -1,33 +1,9 @@
-/*!
-
-=========================================================
-* Argon Dashboard React - v1.2.3
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-import {useUser} from "contexts/UserContext";
 import { Link } from "react-router-dom";
-// reactstrap components
 import {
   DropdownMenu,
   DropdownItem,
   UncontrolledDropdown,
   DropdownToggle,
-  Form,
-  FormGroup,
-  InputGroupText,
-  Input,
-  InputGroup,
   Navbar,
   Nav,
   Container,
@@ -35,8 +11,6 @@ import {
 } from "reactstrap";
 
 const UserNavbar = (props) => {
-  const { user } = useUser();
-
   return (
     <>
       <Navbar className="navbar-top navbar-dark bg-default" expand="md" id="navbar-main">
@@ -59,12 +33,12 @@ const UserNavbar = (props) => {
                   </span>
                   <Media className="ml-2 d-none d-lg-block">
                     <span className="mb-0 text-sm font-weight-bold">
-                      { user.info.name }
+                      { props.user.name }
                     </span>
                   </Media>
                 </Media>
               </DropdownToggle>
-              <DropdownMenu className="dropdown-menu-arrow" right>
+              <DropdownMenu className="dropdown-menu-arrow" end>
                 <DropdownItem className="noti-title" header tag="div">
                   <h6 className="text-overflow m-0">Welcome!</h6>
                 </DropdownItem>

@@ -12,8 +12,8 @@ type (
 func Migration(db *gorm.DB) *gorm.DB {
 	db = MigrateUser(db)
 	db = MigrateTopology(db)
-	db = MigrateNetwork(db)
 	db = MigrateVirtualMachine(db)
+	db = MigrateNetwork(db)
 
 	return db
 }

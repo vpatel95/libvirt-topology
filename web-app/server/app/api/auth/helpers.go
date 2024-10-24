@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
@@ -20,6 +21,7 @@ func generateSid(data JSON) (string, error) {
 
 	sid := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user": data,
+		"time": time.Now(),
 	})
 
 	keyPath := filepath.Join(env.JWTSecret)

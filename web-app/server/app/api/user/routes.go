@@ -11,7 +11,6 @@ func Routes(router *gin.RouterGroup) {
 	routes.Use(middleware.ValidateSessionID(),
 		middleware.Authorization())
 
-	routes.GET("/all", index)
 	routes.Use(middleware.IsSelfUser()).GET("/:id", get)
 	routes.Use(middleware.IsSelfUser()).PUT("/:id", update)
 	routes.Use(middleware.IsSelfUser()).DELETE("/:id", delete)

@@ -17,6 +17,7 @@ type (
 	Session        = sm.Session
 	VirtualMachine = model.VirtualMachine
 	VmRB           = model.VmRB
+	VmResp         = model.VmResp
 )
 
 var (
@@ -29,8 +30,31 @@ func index(c *gin.Context) {
 }
 
 func get(c *gin.Context) {
-	log.Println("In VM GetAll")
-	common.RespondNotImplemented(c)
+	var err error
+	var vm *VmResp
+	var sess *Session
+
+	if sess = common.GetSession(c); sess == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status": "failure",
+			"data":   "Unauthorized",
+		})
+		return
+	}
+
+	id, _ := strconv.Atoi(c.Param("id"))
+	if vm, err = model.GetVmRespById(id); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"status": "failure",
+			"data":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data":   vm,
+	})
 }
 
 func create(c *gin.Context) {
@@ -41,14 +65,16 @@ func create(c *gin.Context) {
 
 	if err = c.ShouldBindJSON(&vmReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": errors.New("Invalid request parameters"),
+			"status": "failure",
+			"data":   errors.New("Invalid request parameters"),
 		})
 		return
 	}
 
 	if sess = common.GetSession(c); sess == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized",
+			"status": "failure",
+			"data":   "Unauthorized",
 		})
 		return
 	}
@@ -57,14 +83,15 @@ func create(c *gin.Context) {
 
 	if vm, err = model.CreateVm(vmReq); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "success",
-		"data":    vm.Serialize(),
+		"status": "success",
+		"data":   vm.Serialize(),
 	})
 }
 
@@ -81,26 +108,29 @@ func delete(c *gin.Context) {
 
 	if sess = common.GetSession(c); sess == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized",
+			"status": "failure",
+			"data":   "Unauthorized",
 		})
 		return
 	}
 
 	if vm, err = model.GetVirtualMachineByID(uint(vmID)); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
 	if err := model.DeleteVm(vm); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "success",
-		"data":    vm.Serialize(),
+		"status": "success",
+		"data":   vm.Serialize(),
 	})
 }

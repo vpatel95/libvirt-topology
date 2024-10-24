@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	valid "github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
@@ -84,11 +85,19 @@ func login(c *gin.Context) {
 	sid, _ := generateSid(user.Serialize())
 
 	log.Println("set sid : " + sid)
-	c.SetCookie(sm.Cookie.Name, sid,
-		int(sm.Cookie.Lifetime), "/", "", false, true)
+
+	// Use Authorization Header instead of Cookie
+	sm.Config.EnableHttpHeader = true
+	sm.Config.SessionHeader = "Authorization"
+	sm.Config.MaxLifetime = 30 * time.Second
+	sm.Config.CleanerInterval = 1 * time.Second
+
+	// c.SetCookie(sm.Cookie.Name, sid,
+	// 	int(sm.Config.MaxLifetime.Seconds()), "/", "", false, true)
 
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "success",
 		"user":    user.Serialize(),
+		"token":   sid,
 	})
 }

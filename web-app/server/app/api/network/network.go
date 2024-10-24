@@ -30,7 +30,8 @@ func get(c *gin.Context) {
 
 	if sess = common.GetSession(c); sess == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized",
+			"status": "failure",
+			"data":   "Unauthorized",
 		})
 		return
 	}
@@ -38,14 +39,15 @@ func get(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if nw, err = model.GetNetworkByID(uint(id)); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "success",
-		"data":    nw,
+		"status": "success",
+		"data":   nw,
 	})
 }
 
@@ -56,14 +58,16 @@ func create(c *gin.Context) {
 
 	if err = c.ShouldBindJSON(&nw); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": errors.New("Invalid request parameters"),
+			"status": "failure",
+			"data":   errors.New("Invalid request parameters"),
 		})
 		return
 	}
 
 	if sess = common.GetSession(c); sess == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized",
+			"status": "failure",
+			"data":   "Unauthorized",
 		})
 		return
 	}
@@ -72,14 +76,15 @@ func create(c *gin.Context) {
 
 	if err = model.CreateNetwork(nw); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{
-		"message": "success",
-		"data":    nw.Serialize(),
+		"status": "success",
+		"data":   nw.Serialize(),
 	})
 }
 
@@ -88,7 +93,47 @@ func update(c *gin.Context) {
 }
 
 func delete(c *gin.Context) {
-	common.RespondNotImplemented(c)
+	var network *Network
+	var sess *Session
+	var err error
+
+	if sess = common.GetSession(c); sess == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status": "failure",
+			"data":   "Unauthorized",
+		})
+		return
+	}
+
+	networkID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"status": "failure",
+			"data":   "Invalid network ID",
+		})
+		return
+	}
+
+	if network, err = model.GetNetworkByID(uint(networkID)); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"status": "failure",
+			"data":   err.Error(),
+		})
+		return
+	}
+
+	if err := model.DeleteNetwork(network); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status": "failure",
+			"data":   err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
+		"data":   network.Serialize(),
+	})
+
 }
 
 func attachedVms(c *gin.Context) {
@@ -99,7 +144,8 @@ func attachedVms(c *gin.Context) {
 
 	if sess = common.GetSession(c); sess == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unauthorized",
+			"status": "failure",
+			"data":   "Unauthorized",
 		})
 		return
 	}
@@ -107,20 +153,22 @@ func attachedVms(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
 	if nw, err = model.GetNetworkByID(uint(id)); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
 	if vms, err = nw.GetAttachedVms(); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
-			"message": err.Error(),
+			"status": "failure",
+			"data":   err.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "success",
-		"data":    vms,
+		"status": "success",
+		"data":   vms,
 	})
 }

@@ -1,17 +1,15 @@
 import React from 'react';
 import {
-  Button,
   Card,
   CardBody,
   CardHeader,
   Col,
   Row
 } from 'reactstrap';
+import {Link} from 'react-router-dom';
 
 import { getNetworkType } from 'utils';
-import {Link} from 'react-router-dom';
-import NetworkService from 'services/network';
-import {useUser, UserActions} from 'contexts/UserContext';
+import {NetworkAPI} from 'services/api';
 
 export const NetworkDetail = ({network, attachedVms}) => {
   return (
@@ -48,8 +46,8 @@ export const NetworkDetail = ({network, attachedVms}) => {
             <Row className="align-items-center">
               <div className="col">
                 <h3>Attached Virtual Machines</h3>
-                { attachedVms.map((vm) => (<>
-                  <ol>
+                { attachedVms && attachedVms.map((vm, index) => (<>
+                  <ol key={index}>
                     <li>Name : {vm.Name}</li>
                     <li>IPv4 Address : {vm.IPv4Address}</li>
                     { vm.IPv6Address && (
@@ -72,14 +70,15 @@ export const NetworkDetail = ({network, attachedVms}) => {
   )
 };
 
-export const NetworkDetailRow = ({networks}) => {
-  const { userDispatch } = useUser();
+export const NetworkDetailRow = (props) => {
+
+  const {networks, setNetworks} = props;
 
   const deleteNetwork = (id) => {
-    NetworkService.delete(id).then(
+    NetworkAPI.delete(id).then(
       res => {
         console.log("Network deleted successfully : ", res);
-        userDispatch({type: UserActions.SET_NEWDATA, payload: true});
+        setNetworks(networks.filter((network) => network.ID !== id));
       },
       err => {
         console.error("Network delete error : ", err);
@@ -107,7 +106,7 @@ export const NetworkDetailRow = ({networks}) => {
                 onClick={deleteNetwork.bind(this, network.ID)} />
           </td>
           <td>
-            <Link to={"/user/networks/" + network.ID} state={network}>
+            <Link to={"/networks/" + network.ID} state={network}>
               <i className="fas fa-eye" style={{cursor: 'pointer', color: 'green'}} />
             </Link>
           </td>
@@ -126,7 +125,7 @@ export const NetworkSummaryRow = ({networks}) => {
       networks.map((network) => (
         <tr key={network.ID}>
           <th scope="row">
-            <Link to={"/user/networks/" + network.ID} state={network}>
+            <Link to={"/networks/" + network.ID} state={network}>
               {network.name}
             </Link>
           </th>
