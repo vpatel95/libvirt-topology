@@ -107,10 +107,11 @@ class Network:
                         f"{network.name_}")
                 sys.exit(3)
 
-            if subnet6 == network.network6_:
-                logging.error(f"IPv6 Network {name} is colliding with " \
-                        f"{network.name_}")
-                sys.exit(3)
+            if subnet6 is not None:
+                if subnet6 == network.network6_:
+                    logging.error(f"IPv6 Network {name} is colliding with " \
+                            f"{network.name_}")
+                    sys.exit(3)
 
         return
     #end __validate_network_conf
