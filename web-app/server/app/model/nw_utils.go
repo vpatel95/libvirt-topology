@@ -18,8 +18,12 @@ func isNetworkType(nt NetworkType) bool {
 }
 
 func validateNetwork(nw Network) error {
-	if valid.IsNull(nw.Name) || !valid.IsCIDR(nw.Subnet4) ||
-		!isNetworkType(nw.Type) || (nw.TopologyID <= 0) || (nw.UserID <= 0) {
+	if valid.IsNull(nw.Name) || !isNetworkType(nw.Type) ||
+		(nw.TopologyID <= 0) || (nw.UserID <= 0) {
+		return errors.New("Invalid request parameters")
+	}
+
+	if nw.Type != Isolated && !valid.IsCIDR(nw.Subnet4) {
 		return errors.New("Invalid request parameters")
 	}
 

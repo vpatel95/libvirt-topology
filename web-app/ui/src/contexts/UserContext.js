@@ -27,10 +27,13 @@ const UserActions = {
 const reducer = (user, action) => {
   switch (action.type) {
     case UserActions.SET_INFO:
+      console.log("SET_INFO called");
       return { ...user, info: action.payload };
     case UserActions.SET_OBJS:
+      console.log("SET_OBJS called");
       return { ...user, objects: action.payload };
     case UserActions.SET_NEWDATA:
+      console.log("SET_NEWDATA called");
       return {...user, new_data:action.payload};
     default:
       return user;

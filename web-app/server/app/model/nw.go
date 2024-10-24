@@ -96,20 +96,22 @@ func CreateNetwork(nw Network) error {
 		return err
 	}
 
-	ip, ipNet, err := net.ParseCIDR(nw.Subnet4)
-	if err != nil {
-		return err
-	}
-	nw.PrefixLen4 = getPrefixLen(ipNet)
-	nw.AddrV4 = ip.String()
-
-	if nw.HasV6 {
-		ip6, ip6Net, err := net.ParseCIDR(nw.Subnet6)
+	if nw.Type != Isolated {
+		ip, ipNet, err := net.ParseCIDR(nw.Subnet4)
 		if err != nil {
 			return err
 		}
-		nw.PrefixLen6 = getPrefixLen(ip6Net)
-		nw.AddrV6 = ip6.String()
+		nw.PrefixLen4 = getPrefixLen(ipNet)
+		nw.AddrV4 = ip.String()
+
+		if nw.HasV6 {
+			ip6, ip6Net, err := net.ParseCIDR(nw.Subnet6)
+			if err != nil {
+				return err
+			}
+			nw.PrefixLen6 = getPrefixLen(ip6Net)
+			nw.AddrV6 = ip6.String()
+		}
 	}
 
 	db := database.DB

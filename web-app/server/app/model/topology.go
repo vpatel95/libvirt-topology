@@ -7,10 +7,10 @@ import (
 
 type Topology struct {
 	gorm.Model
-	Name            string `gorm:"column:name;not null" json:"name"`
-	UserID          int    `gorm:"column:user_id;not null" json:"user_id"`
-	Networks        []Network
-	VirtualMachines []VirtualMachine
+	Name            string           `gorm:"column:name;not null" json:"name"`
+	UserID          int              `gorm:"column:user_id;not null" json:"user_id"`
+	Networks        []Network        `gorm:"constraint:OnDelete:CASCADE;"`
+	VirtualMachines []VirtualMachine `gorm:"constraint:OnDelete:CASCADE;"`
 }
 
 func (t *Topology) Serialize() JSON {
@@ -75,7 +75,7 @@ func CreateTopology(t Topology) error {
 }
 
 func DeleteTopology(t *Topology) error {
-	db := database.DB
+	db := database.DB.Unscoped()
 
 	return db.Delete(t).Error
 }
