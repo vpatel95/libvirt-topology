@@ -16,11 +16,9 @@
 
 */
 import React from "react";
-import { useLocation, Route, Routes, Navigate } from "react-router-dom";
+import { useLocation, Outlet } from "react-router-dom";
 import UserNavbar from "components/Navbars/UserNavbar";
 import Sidebar from "components/Sidebar/Sidebar";
-
-import routes, { objectRoutes } from "routes.js";
 
 const UserLayout = (props) => {
   const mainContent = React.useRef(null);
@@ -32,61 +30,18 @@ const UserLayout = (props) => {
     mainContent.current.scrollTop = 0;
   }, [location]);
 
-
-  const getRoutes = (routes) => {
-    return routes.map((prop, key) => {
-      if (prop.layout === "/user") {
-        return (
-          <Route path={prop.path} element={prop.component} key={key} exact />
-        );
-      } else {
-        return null;
-      }
-    });
-  };
-
-  const getObjectRoutes = (routes) => {
-    return routes.map((prop, key) => {
-      if (prop.layout === "/user") {
-        return (
-          <Route path={prop.path} element={prop.component} key={key} exact />
-        );
-      } else {
-        return null;
-      }
-    });
-  };
-
-  const getBrandText = (path) => {
-    for (let i = 0; i < routes.length; i++) {
-      if ( path.indexOf(routes[i].layout + routes[i].path) !== -1) {
-        return routes[i].name;
-      }
-    }
-    return "Brand";
-  };
-
   return (
     <>
-      <Sidebar
-        {...props}
-        routes={routes}
+      <Sidebar {...props}
         logo={{
           innerLink: "/user/dashboard",
-          imgSrc: require("assets/img/brand/argon-react.png"),
           imgAlt: "...",
+          imgSrc: require("assets/img/brand/argon-react.png"),
         }}
       />
       <div className="main-content" ref={mainContent}>
-          <UserNavbar
-            {...props}
-            brandText={getBrandText(location?.pathname)}
-          />
-          <Routes>
-            {getRoutes(routes)}
-            {getObjectRoutes(objectRoutes)}
-            <Route path="*" element={<Navigate to={"/user/dashboard"} replace />} />
-          </Routes>
+          <UserNavbar {...props} brandText={'TODO'} />
+          <Outlet />
       </div>
     </>
   );

@@ -12,7 +12,7 @@ func Routes(router *gin.RouterGroup) {
 		middleware.Authorization())
 
 	routes.GET("/:id", get)
-	routes.GET("/all", index)
+	routes.GET(":id/attached_vms", attachedVms)
 	routes.POST("/create", create)
 	routes.PUT("/:id", update)
 	routes.DELETE("/:id", delete)

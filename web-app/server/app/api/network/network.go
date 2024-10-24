@@ -2,8 +2,8 @@ package network
 
 import (
 	"errors"
-	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	sm "github.com/vpatel95/session-manager"
@@ -23,14 +23,30 @@ var (
 	sessionManager = globals.SessionManager
 )
 
-func index(c *gin.Context) {
-	log.Println("In Network Get")
-	common.RespondNotImplemented(c)
-}
-
 func get(c *gin.Context) {
-	log.Println("In Network GetAll")
-	common.RespondNotImplemented(c)
+	var err error
+	var nw *Network
+	var sess *Session
+
+	if sess = common.GetSession(c); sess == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	id, _ := strconv.Atoi(c.Param("id"))
+	if nw, err = model.GetNetworkByID(uint(id)); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data":    nw,
+	})
 }
 
 func create(c *gin.Context) {
@@ -73,4 +89,38 @@ func update(c *gin.Context) {
 
 func delete(c *gin.Context) {
 	common.RespondNotImplemented(c)
+}
+
+func attachedVms(c *gin.Context) {
+	var nw *Network
+	var err error
+	var sess *Session
+	var vms []model.AttachedVms
+
+	if sess = common.GetSession(c); sess == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	id, _ := strconv.Atoi(c.Param("id"))
+	if nw, err = model.GetNetworkByID(uint(id)); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if vms, err = nw.GetAttachedVms(); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data":    vms,
+	})
 }

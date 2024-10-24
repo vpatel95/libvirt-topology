@@ -7,7 +7,7 @@ import (
 
 type Topology struct {
 	gorm.Model
-	Name            string           `gorm:"column:name;not null" json:"name"`
+	Name            string           `gorm:"column:name;unique;not null" json:"name"`
 	UserID          int              `gorm:"column:user_id;not null" json:"user_id"`
 	Networks        []Network        `gorm:"constraint:OnDelete:CASCADE;default:NULL"`
 	VirtualMachines []VirtualMachine `gorm:"constraint:OnDelete:CASCADE;default:NULL"`
@@ -85,7 +85,9 @@ func GetTopologyByID(id uint) (*Topology, error) {
 	var topology Topology
 
 	db := database.DB
-	if err = db.First(&topology, id).Error; err != nil {
+	if err = db.Model(topology).
+		Preload("Networks").Preload("VirtualMachines").
+		First(&topology, id).Error; err != nil {
 		return nil, err
 	}
 

@@ -11,8 +11,8 @@ type (
 	User struct {
 		gorm.Model
 		Name            string `gorm:"column:name;not null" json:"name"`
-		Email           string `gorm:"column:email;unique_index;not null" json:"email"`
-		Username        string `gorm:"column:username;unique_index;not null" json:"username"`
+		Email           string `gorm:"column:email;unique;not null" json:"email"`
+		Username        string `gorm:"column:username;unique;not null" json:"username"`
 		Password        string `gorm:"column:password;not null;not null" json:"password"`
 		Topologies      []Topology
 		Networks        []Network

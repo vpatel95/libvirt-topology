@@ -18,40 +18,27 @@
 // reactstrap components
 import {
   Card,
-  CardHeader,
   Container,
   Row,
-  Table,
-} from "reactstrap";
-import Header from "components/Headers/Header.js";
-import {useUser} from "contexts/UserContext";
-import {VmDetailRow} from "components/Tables/VirtualMachineTable";
-import { TableHeader } from "components/Tables/TableHeader";
+} from 'reactstrap';
+import {CardHeaderSimple} from 'components/Cards';
+import {BaseForm} from 'components/Forms';
+import {VirtualMachineTable} from 'components/Tables';
+import {useLoaderData} from 'react-router-dom';
 
 const VirtualMachines = () => {
-  const { user } = useUser();
+
+  const vms = useLoaderData();
+
   return (
     <>
-      <Header userObjects={user.objects} />
-      <Container className="mt--7" fluid>
+      <Container className="pt-md-8" fluid>
         <Row>
           <div className="col">
-            <Card className="shadow">
-              <CardHeader className="border-0">
-                <h3 className="mb-0">Virtual Machines</h3>
-              </CardHeader>
-              <Table className="align-items-center table-flush" responsive>
-                <TableHeader headers={[ "S. No", "Name", "Flavor",
+            <Card className="shadow mb-3">
+                <VirtualMachineTable headers={[ "S. No", "Name", "Flavor",
                     "RAM", "vCPUs", "Disk", "VNC Port", "Topology ID",
-                    "Edit", "Delete", "View" ]} />
-                <tbody>
-                {user.objects.vms.info &&
-                  user.objects.vms.info.map((vm, idx) => (
-                    <VmDetailRow vm={vm} index={idx + 1} key={vm.ID} />
-                  ))
-                }
-                </tbody>
-              </Table>
+                    "Edit", "Delete", "View" ]} vms={vms} />
             </Card>
           </div>
         </Row>
@@ -60,4 +47,38 @@ const VirtualMachines = () => {
   );
 };
 
+export const VmCreate = () => {
+  const formFields = [
+    {name: 'name', label: 'Name'},
+    {name: 'type', label: 'Type', type: 'select',
+      options: [
+        {label: 'PE', value: 'pe'},
+        {label: 'CE', value: 'ce'},
+        {label: 'Dev', value: 'dev'}
+      ],
+    },
+    {name: 'subnet4', label: 'Subnet v4' },
+    {name: 'custom_res', label: 'Configure Custom Resources', type: 'checkbox',
+      conditional : [
+        { name: 'vcpus', label: 'vCPUs', type: 'number' },
+        { name: 'disk', label: 'Disk' },
+        { name: 'ram', label: 'Memory', type: 'number' },
+      ],
+    },
+  ];
+
+  return (
+    <Container className="pt-md-8" fluid>
+      <Row className="align-items-center py-4">
+        <div className="col">
+          <Card className="shadow mb-3">
+            <CardHeaderSimple header={"Create Virtual Machine"} />
+            <BaseForm formFields={formFields} buttonLabel="Submit" method="POST"
+                action={""} />
+          </Card>
+        </div>
+      </Row>
+    </Container>
+  );
+};
 export default VirtualMachines;
