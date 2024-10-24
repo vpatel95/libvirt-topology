@@ -45,11 +45,8 @@ optional arguments:
   -l {DEBUG,INFO,WARNING,ERROR,CRITICAL}, --log {DEBUG,INFO,WARNING,ERROR,CRITICAL}
                         Set the log level
   --dry-run             Instead of executing, print the commands
-  --recreate-nw         [PREVIEW] Recreate the nat network
-  --print-nw            Print out created network details
-  --print-vm            Print out created VM details
-  --no-network          [PREVIEW] Skip creating networks. Cannot be used with --no-vm
-  --no-vm               [PREVIEW] Skip creating vms. Cannot be used with --no-network
+  --skip-network        Skip creating networks. Cannot be used with --skip-vm
+  --skip-vm             Skip creating vms. Cannot be used with --skip-network
 ```
 
 ### Creating Topologies <a name = "create"></a>
@@ -59,16 +56,15 @@ A JSON cofig is taken as input. Check [here](#json_conf) for guide to define con
 sudo topology-deployer -c config.json -o create -i ubuntu -l INFO
 ```
 
-To only create networks. (This is PREVIEW feature. Not fully tested)
+To skip creating networks. It can be used woth delete too. (This is _BETA_ feature. Not fully tested)
+```
+sudo topology-deployer -c config.json -o create -i ubuntu -l INFO --skip-network
+```
+
+To skip creating virtual machines. It can be used woth delete too. (This is _BETA_ feature. Not fully tested)
 
 ```
-sudo topology-deployer -c config.json -o create -i ubuntu -l INFO --no-vm
-```
-
-To only create virtual machines. (This is PREVIEW feature. Not fully tested)
-
-```
-sudo topology-deployer -c config.json -o create -i ubuntu -l INFO --no-network
+sudo topology-deployer -c config.json -o create -i ubuntu -l INFO --skip-vm
 ```
 
 ### Deleting Topologies <a name = "delete"></a>
@@ -97,16 +93,27 @@ The json config to define topologies comprises of 2 sections.
 1. Networks
 2. Virtual Machines
 
+```json
+{
+    "version" : 2,
+    "networks" : [],
+    "vms" : []
+}
+```
+
 ### JSON Network Config <a name = "json_nw"></a>
-The JSON network object comprises of array of required type of networks. A network object skeleton is shown below
+The JSON network object comprises of array of networks. A network object skeleton is shown below
 
 ```json
 {
-    "networks" : {
-        "nat" : [],
-        "isolated" : [],
-        "management" : []
-    }
+    "networks" : [
+        {
+            "name" : "<name>",
+            "type" : "<nat | management | isolated>",
+            "subnet4" : "<ipv4 subnet>",
+            "subnet6" : "<ipv6 subnet>"
+        }
+    ],
 }
 ```
 
@@ -115,13 +122,14 @@ For nat network, `name` and `subnet4` are mandatory fields. `subnet6` is optiona
 
 ```json
 {
-    "networks" : {
-        "nat" : [{
-            "name" : "",
-            "subnet4" : "",
-            "subnet6" : ""
-        }]
-    }
+    "networks" : [
+        {
+            "name" : "<name>",
+            "type" : "nat",
+            "subnet4" : "<ipv4 subnet>",
+            "subnet6" : "<ipv6 subnet>"
+        }
+    ]
 }
 ```
 
@@ -130,12 +138,13 @@ For management network, `name` and `subnet4` are mandatory fields. Currently we 
 
 ```json
 {
-    "networks" : {
-        "management" : [{
-            "name" : "",
-            "subnet4" : ""
-        }]
-    }
+    "networks" : [
+        {
+            "name" : "<name>",
+            "type" : "management",
+            "subnet4" : "<ipv4 subnet>"
+        }
+    ]
 }
 ```
 
@@ -144,11 +153,12 @@ For isolated network, `name` is mandatory fields. To have multiple NAT networks,
 
 ```json
 {
-    "networks" : {
-        "isolated" : [{
-            "name" : ""
-        }]
-    }
+    "networks" : [
+        {
+            "name" : "<name>",
+            "type" : "management"
+        }
+    ]
 }
 ```
 
