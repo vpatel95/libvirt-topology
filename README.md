@@ -15,7 +15,7 @@ Python tool to deploy topologies on Ubuntu from the defined json config files.
 
 ## Prerequisites <a name = "prereq"></a>
 
-Run `./install`
+Run `./scripts/install`
 
 ## User Guide <a name = "usage"></a>
 
