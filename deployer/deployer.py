@@ -8,11 +8,12 @@ from deployer.topology import Topology
 from deployer.utils import ProcessArguments
 from deployer.virtual_machine import VirtualMachine
 
+
 class Deployer:
     config_ = {}
     topology_ = Topology()
 
-    def __init__(self, config:str):
+    def __init__(self, config):
         with open(config) as conf_file:
             self.config_ = json.load(conf_file)
 
@@ -20,10 +21,10 @@ class Deployer:
 
         self.__parse_networks()
         self.__parse_vms()
-    #end __init__
+    # end __init__
 
     @staticmethod
-    def __validate_version(config:dict):
+    def __validate_version(config):
         if config is None:
             logging.critical(f"Error parsing config file {config}")
             sys.exit(1)
@@ -36,7 +37,7 @@ class Deployer:
         if config["version"] != 2:
             logging.error("This version supports only version 2 of config")
             sys.exit(1)
-    #end __validate_version
+    # end __validate_version
 
     def __parse_networks(self):
         nw_configs = self.config_.get("networks", None)
@@ -53,7 +54,7 @@ class Deployer:
             name = nw_conf["name"]
             nw = Network(nw_conf)
             self.Topology().AddNetwork(name, nw)
-    #end __parse_networks
+    # end __parse_networks
 
     def __parse_vms(self):
         vm_configs = self.config_.get("vms", None)
@@ -70,13 +71,14 @@ class Deployer:
             name = vm_conf["name"]
             vm = VirtualMachine(vm_conf)
             self.Topology().AddVm(name, vm)
-    #end __parse_vms
+    # end __parse_vms
 
     def Topology(self):
         return self.topology_
-    #end Topology
+    # end Topology
 
-#end Deployer
+# end Deployer
+
 
 def topology_deployer():
     conf_file = ProcessArguments(sys.argv[1:])

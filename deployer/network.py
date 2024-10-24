@@ -7,10 +7,11 @@ import xml.etree.cElementTree as ET
 
 import deployer.globals as G
 from deployer.globals import LIBVIRT_QEMU_NW, NETWORK_TYPES, OP_CREATE
-from deployer.nat_utils import AddIptableRules, AddLinuxBridge, \
-        CheckForwarding, DelIptableRules, DelLinuxBridge
+from deployer.nat_utils import AddDelIptableRules, AddLinuxBridge, \
+        CheckForwarding, DelLinuxBridge
 from deployer.topology import Topology
 from deployer.utils import ExecuteCommand
+
 
 class Network:
     type_ = None
@@ -31,7 +32,7 @@ class Network:
         if self.type_ in ["nat", "management"]:
             self.__add_v4_network(conf["subnet4"])
             self.__add_v6_network(conf.get("subnet6", None))
-    #end __init__
+    # end __init__
 
     @staticmethod
     def __has_valid_network_fields(nw):
@@ -50,7 +51,7 @@ class Network:
             logging.critical("'subnet' is required key for nat and management"
                              " networks")
             sys.exit(3)
-    #end __has_valid_network_fields
+    # end __has_valid_network_fields
 
     @staticmethod
     def __validate_network_conf(nw):
@@ -77,11 +78,11 @@ class Network:
 
         try:
             subnet4 = ipaddress.ip_network(nw["subnet4"],
-                                        strict=False)
+                                           strict=False)
             subnet6 = None
             if nw.get("subnet6", None) is not None:
                 subnet6 = ipaddress.ip_network(nw["subnet6"],
-                                            strict=False)
+                                               strict=False)
         except ValueError:
             logging.error("Invalid Subnet(s). Please check again")
             sys.exit(3)
@@ -91,41 +92,41 @@ class Network:
                 if addr.family == 2:
                     if ipaddress.IPv4Address(addr.address) in subnet4:
                         logging.error(f"Network colliding with {str(subnet4)} "
-                                        f" already exists on {interface}")
+                                      f" already exists on {interface}")
                         sys.exit(3)
 
                 if (addr.family == 10 and subnet6 is not None):
                     v6_addr = addr.address.split('%')[0]
                     if ipaddress.IPv6Address(v6_addr) in subnet6:
                         logging.error(f"Network colliding with {str(subnet6)} "
-                                        f" already exists on {interface}")
+                                      f" already exists on {interface}")
                         sys.exit(3)
 
         for _, network in Network.Topology().Networks():
             if subnet4 == network.network4_:
-                logging.error(f"IPv4 Network {name} is colliding with " \
-                        f"{network.name_}")
+                logging.error(f"IPv4 Network {name} is colliding with "
+                              f"{network.name_}")
                 sys.exit(3)
 
             if subnet6 is not None:
                 if subnet6 == network.network6_:
-                    logging.error(f"IPv6 Network {name} is colliding with " \
-                            f"{network.name_}")
+                    logging.error(f"IPv6 Network {name} is colliding with "
+                                  f"{network.name_}")
                     sys.exit(3)
 
         return
-    #end __validate_network_conf
+    # end __validate_network_conf
 
     @staticmethod
     def Topology():
         return Network.topology_
-    #end Topology
+    # end Topology
 
     def __add_v4_network(self, subnet4):
         logging.debug(f"Adding IPv4 Network for {self.name_}")
         self.network4_ = ipaddress.IPv4Network(subnet4)
         self.ip4_ = self.network4_[1]
-    #end __add_v4_network
+    # end __add_v4_network
 
     def __add_v6_network(self, subnet6):
         if subnet6 is not None:
@@ -134,7 +135,7 @@ class Network:
             self.ip6_ = self.network6_[1]
         else:
             logging.warning(f"No IPv6 subnet provided for {self.name_}")
-    #end __add_v6_network
+    # end __add_v6_network
 
     def __create_nat_network(self):
         logging.info(f"Creating NAT network : {self.name_}")
@@ -148,8 +149,8 @@ class Network:
 
         AddLinuxBridge(self.name_, str(self.ip4_), str(self.ip6_),
                        self.plen4_, self.plen6_)
-        AddIptableRules(self.name_, str(self.network4_))
-    #end __create_nat_network
+        AddDelIptableRules("A", self.name_, str(self.network4_))
+    # end __create_nat_network
 
     def __create_management_network(self):
         logging.info(f"Creating Management network : {self.name_}")
@@ -160,13 +161,13 @@ class Network:
         ET.SubElement(nw_ele, "bridge", {"name": self.name_, "stp": "on", "delay": "0"})
 
         if self.network4_:
-            ip_ele = ET.SubElement(nw_ele, "ip", {
+            _ = ET.SubElement(nw_ele, "ip", {
                 "address": str(self.ip4_),
                 "netmask": str(self.network4_.netmask)
             })
 
         xmlstr = minidom.parseString(ET.tostring(nw_ele)).toprettyxml(indent="   ")
-        with open (nw_cfg_file, "w") as f:
+        with open(nw_cfg_file, "w") as f:
             f.write(xmlstr)
 
         cmd = f"sudo virsh net-define {nw_cfg_file}"
@@ -175,8 +176,7 @@ class Network:
         ExecuteCommand(cmd)
         cmd = f"sudo virsh net-autostart {self.name_}"
         ExecuteCommand(cmd)
-    #end __create_management_network
-
+    # end __create_management_network
 
     def __create_isolated_network(self):
         logging.info(f"Creating Isolated network : {self.name_}")
@@ -187,7 +187,7 @@ class Network:
         ET.SubElement(nw_ele, "bridge", {"name": self.name_, "stp": "on", "delay": "0"})
 
         xmlstr = minidom.parseString(ET.tostring(nw_ele)).toprettyxml(indent="   ")
-        with open (nw_cfg_file, "w") as f:
+        with open(nw_cfg_file, "w") as f:
             f.write(xmlstr)
 
         cmd = f"sudo virsh net-define {nw_cfg_file}"
@@ -196,58 +196,61 @@ class Network:
         ExecuteCommand(cmd)
         cmd = f"sudo virsh net-autostart {self.name_}"
         ExecuteCommand(cmd)
-    #end __create_isolated_network
+    # end __create_isolated_network
 
     def __delete_nat_network(self):
-        DelIptableRules(self.name_, str(self.network4_))
+        AddDelIptableRules("D", self.name_, str(self.network4_))
         DelLinuxBridge(self.name_)
-    #end __delete_nat_network
+    # end __delete_nat_network
 
     def __delete_libvirt_network(self):
         cmd = f"sudo virsh net-destroy {self.name_}"
         ExecuteCommand(cmd)
         cmd = f"sudo virsh net-undefine {self.name_}"
         ExecuteCommand(cmd)
-    #end __delete_libvirt_network
+    # end __delete_libvirt_network
 
     def Delete(self):
-        if self.type_ == "nat":
+        if self.IsNat():
             self.__delete_nat_network()
-        elif self.type_ in ["isolated","management"]:
+        elif self.IsLibvirtNetwork():
             self.__delete_libvirt_network()
         else:
             logging.error(f"Unknown network type {self.type_}")
             sys.exit(3)
-    #end Delete
-
+    # end Delete
 
     def Create(self):
-        if self.type_ == "nat":
+        if self.IsNat():
             self.__create_nat_network()
-        elif self.type_ == "isolated":
+        elif self.IsIsolated():
             self.__create_isolated_network()
-        elif self.type_ == "management":
+        elif self.IsManagement():
             self.__create_management_network()
         else:
             logging.error(f"Unknown network type {self.type_}")
             sys.exit(3)
-    #end Create
+    # end Create
 
     def Type(self):
         return self.type_
-    #end Type
+    # end Type
 
     def IsIsolated(self):
         return self.type_ == "isolated"
-    #end IsIsolated
+    # end IsIsolated
 
     def IsManagement(self):
         return self.type_ == "management"
-    #end IsManagement
+    # end IsManagement
 
     def IsNat(self):
         return self.type_ == "nat"
-    #end IsNat
+    # end IsNat
+
+    def IsLibvirtNetwork(self):
+        return self.type_ in ["isolated", "management"]
+    # end IsLibvirtNetwork
 
     def __str__(self):
         nw_str = f"Type : {self.type_}\n"
