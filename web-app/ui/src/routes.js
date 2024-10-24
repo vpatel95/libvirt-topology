@@ -17,7 +17,7 @@
 */
 import Index from "views/Index";
 import Profile from "views/Profile";
-import Networks from "views/Networks";
+import Networks, {Network} from "views/Networks";
 import Register from "views/Register";
 import Login from "views/Login";
 import VirtualMachines from "views/VirtualMachines";
@@ -84,7 +84,7 @@ export var objectRoutes = [
   },
   {
     path: "/network/:nid",
-    component: <Networks />,
+    component: <Network />,
     layout: "/user",
   },
   {
