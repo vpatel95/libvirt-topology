@@ -188,8 +188,29 @@ The vms object is array of multiple vm objects. For the vm object on the JSON co
 
 To define networks for the vm, you have to use the network name as key and provide `v4` address. You can also add a `v6` address if the network type is NAT.
 
+If you want to customize the resources for your VM you can use the `vcpus`, `ram` and `disk` keys. Example
+```json
+{
+    "vms" : [{
+        "name" : "",
+        "flavor" : "",
+        "vcpus" : 10,
+        "ram" : 8192,
+        "disk" : "128G",
+        "vnc_port" : "",
+        "networks" : {
+            "<nw_name1>" : {
+                "v4" : ""
+            },
+            "<nw_name2>" : {
+                "v4" : "",
+                "v6" : ""
+            }
+        }
+    }]
+}
+```
 ## Sample Topology Configurations
 
 1. [2PE-CE](topologies/evpn-2pe.json)
 2. [2PE-2PSWITCH-2CE](topologies/sr-mpls.json)
-
