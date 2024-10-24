@@ -22,6 +22,7 @@ def ProcessArguments() -> str:
         logging.basicConfig(level=log_level)
 
     if args.dry_run:
+        global DRY_RUN
         DRY_RUN = args.dry_run
 
     return args.config
