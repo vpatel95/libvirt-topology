@@ -3,7 +3,6 @@ import logging
 from socket import AddressFamily
 import unittest
 from unittest import mock
-from unittest.mock import patch
 
 import deployer
 import deployer.topology
@@ -13,21 +12,19 @@ from deployer.network import Network
 
 class TestNetwork(unittest.TestCase):
     def setUp(self):
-        self.net_if_addr_patcher = mock.patch('psutil._psplatform.net_if_addrs')
-        self.mock_net_if_addrs = self.net_if_addr_patcher.start()
-        self.topo_nw_patcher = mock.patch.object(deployer.topology.Topology, 'Networks')
-        self.mock_topo_nw = self.topo_nw_patcher.start()
-
         G.OP = G.OP_CREATE
         self.nw_ = {"name": "test-nw", "type": "isolated"}
         logging.basicConfig(level="ERROR")
 
+        # Mocking the psutil.net_if_addrs() method
         self.mocked_intf_ = [
             ('em1', AddressFamily.AF_INET, '20.20.1.1', '255.255.255.0', None, None),
             ('em1', AddressFamily.AF_INET6, '1234::1414:101',
                 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ff00', None, None),
             ('em1', AddressFamily.AF_PACKET, '52:54:00:aa:bb:cc', None, None, None)
         ]
+        self.net_if_addr_patcher = mock.patch('psutil._psplatform.net_if_addrs')
+        self.mock_net_if_addrs = self.net_if_addr_patcher.start()
         self.mock_net_if_addrs.return_value = self.mocked_intf_
 
         self.dummy_nw_ = Network({
@@ -36,10 +33,13 @@ class TestNetwork(unittest.TestCase):
             "subnet4": "11.11.11.0/24",
             "subnet6": "1234::11.11.11.0/120"
         })
+
+        # Mocking the Topology.Networks() method
         self.mocked_topo_nw_ = {
             "dummy-nw": self.dummy_nw_
         }.items()
-
+        self.topo_nw_patcher = mock.patch.object(deployer.topology.Topology, 'Networks')
+        self.mock_topo_nw = self.topo_nw_patcher.start()
         self.mock_topo_nw.return_value = self.mocked_topo_nw_
 
     def tearDown(self):
