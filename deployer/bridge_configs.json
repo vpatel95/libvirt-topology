@@ -1,0 +1,17 @@
+{
+    "network": {
+        "version": 2,
+        "renderer": "networkd",
+        "bridges": [{
+            "virbr10": {
+                "interfaces": ["ens5f0"],
+                "addresses": ["10.10.1.1/24"],
+                "dhcp4": false,
+                "dhcp6": false,
+                "parameters": {
+                    "stp": true
+                }
+            }
+        }]
+    }
+}
