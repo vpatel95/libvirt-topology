@@ -18,7 +18,6 @@ if [[ "$#" -ne 6 ]]; then
     exit 1
 fi
 
-set -x
 # Read from config
 BR_NAME=${1}
 DUMMY_INTF="${BR_NAME}-nic"
@@ -139,4 +138,4 @@ else
     sudo systemctl restart dnsmasq@${BR_NAME}.service
 fi
 
-set +xe
+set +e
