@@ -15,7 +15,27 @@ function usage() {
 }
 
 function create_pe() {
-    set -x
+    VM_NAME=${1}
+    MAC_ADDR=${2}
+    VNC_PORT=${3}
+    sudo virt-install \
+        --virt-type kvm \
+        --name ${VM_NAME} \
+        --vcpus 8 \
+        --ram 16384 \
+        --os-variant ubuntu20.04 \
+        --graphics vnc,listen=0.0.0.0,port=${VNC_PORT} \
+        --cdrom /var/lib/libvirt/boot/ubuntu-22.04.2-live-server-amd64.iso \
+        --disk path=/var/lib/libvirt/images/${VM_NAME}.qcow2,size=80,bus=virtio,format=qcow2 \
+        --network bridge=br-mgmt1,model=virtio,mac=${MAC_ADDR} \
+        --network bridge=br1,model=virtio \
+        --network bridge=br2,model=virtio \
+        --network bridge=br-iso1,model=virtio \
+        --network bridge=br-iso2,model=virtio \
+        --noautoconsole
+}
+
+function create_ce() {
     VM_NAME=${1}
     MAC_ADDR=${2}
     VNC_PORT=${3}
@@ -27,33 +47,31 @@ function create_pe() {
         --os-variant ubuntu20.04 \
         --graphics vnc,listen=0.0.0.0,port=${VNC_PORT} \
         --cdrom /var/lib/libvirt/boot/ubuntu-22.04.2-live-server-amd64.iso \
-        --disk path=/var/lib/libvirt/images/${VM_NAME}.qcow2,size=80,bus=virtio,format=qcow2 \
+        --disk path=/var/lib/libvirt/images/${VM_NAME}.qcow2,size=40,bus=virtio,format=qcow2 \
         --network bridge=br-mgmt1,model=virtio,mac=${MAC_ADDR} \
-        --network bridge=br1,model=virtio \
-        --network bridge=br2,model=virtio \
         --network bridge=br-iso1,model=virtio \
         --network bridge=br-iso2,model=virtio \
+        --network bridge=br1,model=virtio \
         --noautoconsole
-    set +x
 }
 
-function create_ce() {
+function create_dev() {
     VM_NAME=${1}
     MAC_ADDR=${2}
     VNC_PORT=${3}
     sudo virt-install \
         --virt-type kvm \
         --name ${VM_NAME} \
-        --vcpus 4 \
-        --ram 8192 \
+        --vcpus 32 \
+        --ram 65536 \
         --os-variant ubuntu20.04 \
         --graphics vnc,listen=0.0.0.0,port=${VNC_PORT} \
         --cdrom /var/lib/libvirt/boot/ubuntu-22.04.2-live-server-amd64.iso \
-        --disk path=/var/lib/libvirt/images/${VM_NAME}.qcow2,size=40,bus=virtio,format=qcow2 \
-        --extra-args='console=ttyS0 default_hugepagesz=1G hugepagesz=1G hugepages=4 intel_iommu=on iommu=pt' \
+        --disk path=/var/lib/libvirt/images/${VM_NAME}.qcow2,size=300,bus=virtio,format=qcow2 \
         --network bridge=br-mgmt1,model=virtio,mac=${MAC_ADDR} \
-        --network bridge=br-iso1,model=virtio \
-        --network bridge=br-iso2,model=virtio
+        --network bridge=br1,model=virtio \
+        --network bridge=br2,model=virtio \
+        --noautoconsole
 }
 
 function delete_vm() {
@@ -75,6 +93,10 @@ case $1 in
     ce)
         shift
         create_ce ${1} ${2} ${3}
+        ;;
+    dev)
+        shift
+        create_dev ${1} ${2} ${3}
         ;;
     *)
         usage

@@ -50,45 +50,34 @@ fi
 sudo sysctl -p
 
 if [[ ! -f "${HOME}/.topology/bridges/${BR_NAME}" ]]; then
-    sudo tee -a /etc/iptables/rules.v4 > /dev/null << EOF
+    # DHCP packets sent to VMs have no checksum (due to a longstanding bug).
+    sudo iptables -t mangle -A POSTROUTING -o ${BR_NAME} -p udp -m udp --dport 68 -j CHECKSUM --checksum-fill
 
-## Start rules for {BR_NAME} ##
-*mangle
-# DHCP packets sent to VMs have no checksum (due to a longstanding bug).
--A POSTROUTING -o ${BR_NAME} -p udp -m udp --dport 68 -j CHECKSUM --checksum-fill
-COMMIT
+    # Do not masquerade to these reserved address blocks.
+    sudo iptables -t nat -A POSTROUTING -s ${BR_SUBNET} -d 224.0.0.0/24 -j RETURN
+    sudo iptables -t nat -A POSTROUTING -s ${BR_SUBNET} -d 255.255.255.255/32 -j RETURN
+    # Masquerade all packets going from VMs to the LAN/Internet.
+    sudo iptables -t nat -A POSTROUTING -s ${BR_SUBNET} ! -d ${BR_SUBNET} -p tcp -j MASQUERADE --to-ports 1024-65535
+    sudo iptables -t nat -A POSTROUTING -s ${BR_SUBNET} ! -d ${BR_SUBNET} -p udp -j MASQUERADE --to-ports 1024-65535
+    sudo iptables -t nat -A POSTROUTING -s ${BR_SUBNET} ! -d ${BR_SUBNET} -j MASQUERADE
 
-*nat
-# Do not masquerade to these reserved address blocks.
--A POSTROUTING -s ${BR_SUBNET} -d 224.0.0.0/24 -j RETURN
--A POSTROUTING -s ${BR_SUBNET} -d 255.255.255.255/32 -j RETURN
-# Masquerade all packets going from VMs to the LAN/Internet.
--A POSTROUTING -s ${BR_SUBNET} ! -d ${BR_SUBNET} -p tcp -j MASQUERADE --to-ports 1024-65535
--A POSTROUTING -s ${BR_SUBNET} ! -d ${BR_SUBNET} -p udp -j MASQUERADE --to-ports 1024-65535
--A POSTROUTING -s ${BR_SUBNET} ! -d ${BR_SUBNET} -j MASQUERADE
-COMMIT
+    # # Allow basic INPUT traffic.
+    # sudo iptables -t filter -A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    # sudo iptables -t filter -A INPUT -i lo -j ACCEPT
+    # sudo iptables -t filter -A INPUT -p icmp --icmp-type 8 -m conntrack --ctstate NEW -j ACCEPT
+    # # Accept SSH connections.
+    # sudo iptables -t filter -A INPUT -p tcp -m tcp --syn -m conntrack --ctstate NEW --dport 22 -j ACCEPT
+    # Accept DNS (port 53) and DHCP (port 67) packets from VMs.
+    sudo iptables -t filter -A INPUT -i ${BR_NAME} -p udp -m udp -m multiport --dports 53,67 -j ACCEPT
+    sudo iptables -t filter -A INPUT -i ${BR_NAME} -p tcp -m tcp -m multiport --dports 53,67 -j ACCEPT
 
-*filter
-# Allow basic INPUT traffic.
--A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
--A INPUT -i lo -j ACCEPT
--A INPUT -p icmp --icmp-type 8 -m conntrack --ctstate NEW -j ACCEPT
-# Accept SSH connections.
--A INPUT -p tcp -m tcp --syn -m conntrack --ctstate NEW --dport 22 -j ACCEPT
-# Accept DNS (port 53) and DHCP (port 67) packets from VMs.
--A INPUT -i ${BR_NAME} -p udp -m udp -m multiport --dports 53,67 -j ACCEPT
--A INPUT -i ${BR_NAME} -p tcp -m tcp -m multiport --dports 53,67 -j ACCEPT
-
-# Allow established traffic to the private subnet.
--A FORWARD -d ${BR_SUBNET} -o ${BR_NAME} -j ACCEPT
-# Allow outbound traffic from the private subnet.
--A FORWARD -s ${BR_SUBNET} -i ${BR_NAME} -j ACCEPT
-# Allow traffic between virtual machines.
--A FORWARD -i ${BR_NAME} -j ACCEPT
--A FORWARD -o ${BR_NAME} -j ACCEPT
-COMMIT
-## End rules for ${BR_NAME} ##
-EOF
+    # Allow established traffic to the private subnet.
+    sudo iptables -t filter -A FORWARD -d ${BR_SUBNET} -o ${BR_NAME} -j ACCEPT
+    # Allow outbound traffic from the private subnet.
+    sudo iptables -t filter -A FORWARD -s ${BR_SUBNET} -i ${BR_NAME} -j ACCEPT
+    # Allow traffic between virtual machines.
+    sudo iptables -t filter -A FORWARD -i ${BR_NAME} -j ACCEPT
+    sudo iptables -t filter -A FORWARD -o ${BR_NAME} -j ACCEPT
 
     sudo mkdir -p /var/lib/dnsmasq/${BR_NAME}
     sudo touch /var/lib/dnsmasq/${BR_NAME}/hostsfile
