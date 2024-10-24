@@ -89,4 +89,3 @@ def DelIptableRules(name: str, nw4: str) -> None:
     ExecuteCommand("sudo iptables -t filter -D FORWARD -i {} -j ACCEPT".format(name))
     ExecuteCommand("sudo iptables -t filter -D FORWARD -o {} -j ACCEPT".format(name))
     ExecuteCommand("sudo sh -c 'iptables-save > /etc/iptables/rules.v4'")
-    pass
