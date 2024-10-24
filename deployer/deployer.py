@@ -49,10 +49,10 @@ class Deployer:
             return False
 
         for nw_conf in nw_configs:
-            name = nw_conf["name"]
             nw = Network(nw_conf)
             if nw is None:
                 return False
+            name = nw.name_
             self.Topology().AddNetwork(name, nw)
 
         return True
@@ -74,10 +74,10 @@ class Deployer:
             return False
 
         for vm_conf in vm_configs:
-            name = vm_conf["name"]
             vm = VirtualMachine(vm_conf)
             if vm is None:
                 return False
+            name = vm.name_
             self.Topology().AddVm(name, vm)
 
         return True

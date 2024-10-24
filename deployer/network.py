@@ -60,6 +60,9 @@ class Network:
 
     @staticmethod
     def _validate_network_conf(nw):
+        if G.NO_NETWORK:
+            return True
+
         if not Network._has_valid_network_fields(nw):
             return False
 
