@@ -79,7 +79,7 @@ class Deployer:
 #end Deployer
 
 def topology_deployer():
-    conf_file = ProcessArguments()
+    conf_file = ProcessArguments(sys.argv[1:])
     tDeployer = Deployer(conf_file)
     topology = tDeployer.Topology()
 
