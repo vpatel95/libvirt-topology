@@ -4,12 +4,15 @@ from unittest import mock
 
 import deployer
 import deployer.topology
+import deployer.globals as G
+from deployer.deployer import Deployer
 from deployer.network import Network
 from deployer.virtual_machine import VirtualMachine
 
 
 class TestVirtualMachine(unittest.TestCase):
     def setUp(self):
+        self.deployer_ = Deployer({})
         self.vm_ = None
         self.iso_nw_ = Network({
             "name": "iso1",
@@ -278,3 +281,57 @@ class TestVirtualMachine(unittest.TestCase):
                          "/var/lib/libvirt/images/vm1/cloud-init.iso")
         self.assertEqual(str(self.vm_.libvirt_vm_base),
                          "/var/lib/libvirt/images/vm1")
+
+    def test_add_custom_virtual_machine(self):
+        del self.vm_conf_["flavor"]
+        self.vm_conf_["disk"] = "300G"
+        self.vm_conf_["ram"] = 24576
+        self.vm_conf_["vcpus"] = 12
+        self.vm_ = VirtualMachine(self.vm_conf_)
+        self.mock_mkdir.assert_called_once_with(parents=True, exist_ok=True)
+        self.assertEqual(self.vm_.name_, "vm1")
+        self.assertEqual(self.vm_.vnc_port_, 5900)
+        self.assertEqual(self.vm_.flavor_, "")
+        self.assertEqual(self.vm_.vcpus_, 12)
+        self.assertEqual(self.vm_.ram_, 24576)
+        self.assertEqual(self.vm_.root_disk_sz_, "300G")
+        self.assertEqual(self.vm_.networks_, {
+            "mgmt1": self.mgmt_conf_,
+            "nat1": self.nat_conf_,
+            "iso1": self.iso_conf_
+        })
+        self.assertEqual(str(self.vm_.user_data_cfg_),
+                         "/var/lib/libvirt/images/vm1/user-data.cfg")
+        self.assertEqual(str(self.vm_.network_data_cfg_),
+                         "/var/lib/libvirt/images/vm1/nw-data.cfg")
+        self.assertEqual(str(self.vm_.root_disk_),
+                         "/var/lib/libvirt/images/vm1/root_disk.qcow2")
+        self.assertEqual(str(self.vm_.cloud_init_iso_),
+                         "/var/lib/libvirt/images/vm1/cloud-init.iso")
+        self.assertEqual(str(self.vm_.libvirt_vm_base),
+                         "/var/lib/libvirt/images/vm1")
+
+    @mock.patch('pathlib.Path.is_file', return_value=True)
+    def test_add_virtual_machine_valid_base_image(self, mock_is_file):
+        self.vm_conf_["base_image"] = "/path/to/base_image"
+        self.deployer_.config_['vms'] = [self.vm_conf_]
+        ok = self.deployer_._parse_vms()
+        self.vm_ = self.deployer_.topology_.vms_[self.vm_conf_["name"]]
+        self.assertEqual(self.vm_.base_image_, "/path/to/base_image")
+        self.assertTrue(ok)
+
+    @mock.patch('pathlib.Path.is_file', return_value=False)
+    def test_add_virtual_machine_invalid_base_image(self, mock_is_file):
+        self.vm_conf_["base_image"] = "/path/to/base_image"
+        self.deployer_.config_['vms'] = [self.vm_conf_]
+        ok = self.deployer_._parse_vms()
+        self.vm_ = self.deployer_.topology_.vms_[self.vm_conf_["name"]]
+        self.assertFalse(ok)
+        del self.deployer_.topology_.vms_[self.vm_conf_["name"]]
+
+    def test_add_virtual_machine_default_base_image(self):
+        self.deployer_.config_['vms'] = [self.vm_conf_]
+        ok = self.deployer_._parse_vms()
+        self.vm_ = self.deployer_.topology_.vms_[self.vm_conf_["name"]]
+        self.assertEqual(self.vm_.base_image_, G.UBUNTU_TEMPLATE)
+        self.assertTrue(ok)
