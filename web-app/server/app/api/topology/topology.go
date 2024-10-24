@@ -26,9 +26,16 @@ var (
 )
 
 func get(c *gin.Context) {
-	log.Println("In Topology By Id")
 	var err error
 	var topology *Topology
+	var sess *Session
+
+	if sess = common.GetSession(c); sess == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+		return
+	}
 
 	id, _ := strconv.Atoi(c.Param("id"))
 	if topology, err = model.GetTopologyByID(uint(id)); err != nil {
@@ -40,7 +47,7 @@ func get(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success",
-		"users":   topology,
+		"data":    topology,
 	})
 }
 

@@ -67,22 +67,22 @@ type (
 
 	VirtualMachine struct {
 		gorm.Model
-		Name       string    `gorm:"column:name;not null" json:"name"`
+		Name       string    `gorm:"column:name;unique;not null" json:"name"`
 		Flavor     VmFlavor  `gorm:"type:enum('pe', 'ce', 'dev')" json:"flavor"`
-		VNCPort    int       `gorm:"column:vnc_port;unique_index;not null" json:"vnc_port"`
+		VNCPort    int       `gorm:"column:vnc_port;unique;not null" json:"vnc_port"`
 		Disk       string    `gorm:"column:disk" json:"disk"`
 		Ram        int       `gorm:"column:ram" json:"ram"`
 		Vcpu       int       `gorm:"column:vcpu" json:"vcpu"`
 		TopologyID int       `gorm:"column:topology_id;not null" json:"topology_id"`
 		UserID     int       `gorm:"column:user_id;not null" json:"user_id"`
-		Networks   []Network `gorm:"many2many:virtual_machine_networks; constraint:OnDelete:CASCADE"`
+		Networks   []Network `gorm:"many2many:vm_networks; constraint:OnDelete:CASCADE"`
 	}
 
-	VirtualMachineNetwork struct {
-		VirtualMachineID int    `gorm:"column:virtual_machine_id;primaryKey;constraint:OnDelete:CASCADE"`
-		NetworkID        int    `gorm:"column:network_id;primaryKey;constraint:OnDelete:CASCADE"`
-		IPv4Address      string `gorm:"column:ipv4_address;not null"`
-		IPv6Address      string `gorm:"column:ipv6_address;default:NULL"`
+	VmNetwork struct {
+		VmID        int    `gorm:"column:virtual_machine_id;primaryKey;constraint:OnDelete:CASCADE"`
+		NetworkID   int    `gorm:"column:network_id;primaryKey;constraint:OnDelete:CASCADE"`
+		IPv4Address string `gorm:"column:ipv4_address;not null"`
+		IPv6Address string `gorm:"column:ipv6_address;default:NULL"`
 	}
 )
 
@@ -166,7 +166,7 @@ func (vm *VirtualMachine) GetMgmtNetwork() ([]Network, error) {
 
 func (vm *VirtualMachine) GetMgmtIp() (string, error) {
 	var err error
-	var vmn VirtualMachineNetwork
+	var vmn VmNetwork
 
 	db := database.DB
 
@@ -182,7 +182,7 @@ func (vm *VirtualMachine) GetMgmtIp() (string, error) {
 func (vm *VirtualMachine) GetAddrByNID(nid int, v4 bool) (string, error) {
 	var err error
 	var ip string
-	var vmn VirtualMachineNetwork
+	var vmn VmNetwork
 
 	db := database.DB
 
@@ -229,7 +229,7 @@ func GetVmRespById(vid int) (*VmResp, error) {
 }
 
 func MigrateVirtualMachine(db *gorm.DB) *gorm.DB {
-	if err := db.SetupJoinTable(&VirtualMachine{}, "Networks", &VirtualMachineNetwork{}); err != nil {
+	if err := db.SetupJoinTable(&VirtualMachine{}, "Networks", &VmNetwork{}); err != nil {
 		panic(err)
 	}
 	db.AutoMigrate(&VirtualMachine{})
@@ -259,9 +259,9 @@ func CreateVm(vmReq VmRB) (*VirtualMachine, error) {
 		}
 
 		vm.Networks = append(vm.Networks, nw)
-		ip4 := net.ParseIP(vmNet.IPv4Address)
 
 		if nw.Type != Isolated {
+			ip4 := net.ParseIP(vmNet.IPv4Address)
 			if _, ipNet, err = net.ParseCIDR(nw.Subnet4); err != nil {
 				return nil, err
 			}
@@ -272,9 +272,8 @@ func CreateVm(vmReq VmRB) (*VirtualMachine, error) {
 		}
 
 		if nw.HasV6 && len(vmNet.IPv6Address) != 0 {
-			ip6 := net.ParseIP(vmNet.IPv6Address)
-
 			if nw.Type != Isolated {
+				ip6 := net.ParseIP(vmNet.IPv6Address)
 				if _, ipNet, err = net.ParseCIDR(nw.Subnet6); err != nil {
 					return nil, err
 				}
@@ -305,9 +304,15 @@ func CreateVm(vmReq VmRB) (*VirtualMachine, error) {
 		default:
 			return nil, errors.New("Invalid request parameters")
 		}
-	} else {
+	}
+
+	if vmReq.Ram > 0 {
 		vm.Ram = vmReq.Ram
+	}
+	if vmReq.Disk != "" {
 		vm.Disk = vmReq.Disk
+	}
+	if vmReq.Vcpu > 0 {
 		vm.Vcpu = vmReq.Vcpu
 	}
 
@@ -319,10 +324,10 @@ func CreateVm(vmReq VmRB) (*VirtualMachine, error) {
 
 		for idx, nw := range vm.Networks {
 
-			vmn := VirtualMachineNetwork{
-				VirtualMachineID: int(vm.ID),
-				NetworkID:        int(nw.ID),
-				IPv4Address:      vmReq.Networks[idx].IPv4Address,
+			vmn := VmNetwork{
+				VmID:        int(vm.ID),
+				NetworkID:   int(nw.ID),
+				IPv4Address: vmReq.Networks[idx].IPv4Address,
 			}
 
 			if len(vmReq.Networks[idx].IPv6Address) != 0 {

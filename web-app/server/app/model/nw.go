@@ -21,7 +21,7 @@ type (
 	NetworkType string
 	Network     struct {
 		gorm.Model
-		Name       string      `gorm:"column:name;unique_index;not null" json:"name"`
+		Name       string      `gorm:"column:name;unique;not null" json:"name"`
 		Subnet4    string      `gorm:"column:subnet4;not null" json:"subnet4"`
 		PrefixLen4 int         `gorm:"column:prefix_len4;not null" json:"prefix_len4"`
 		AddrV4     string      `gorm:"column:addr_v4;not null" json:"addr_v4"`
@@ -32,6 +32,13 @@ type (
 		Type       NetworkType `gorm:"type:enum('nat', 'isolated', 'management');not null"`
 		TopologyID int         `gorm:"column:topology_id;not null" json:"topology_id"`
 		UserID     int         `gorm:"column:user_id;not null" json:"user_id"`
+	}
+
+	AttachedVms struct {
+		ID          uint
+		Name        string
+		IPv4Address string
+		IPv6Address string
 	}
 )
 
@@ -77,17 +84,37 @@ func (n *Network) Load(data JSON) {
 	}
 }
 
-func (nw *Network) GetV4Addr() (string, error) {
-	return "", nil
-}
+func (nw *Network) GetAttachedVms() ([]AttachedVms, error) {
+	var vms []AttachedVms
+	db := database.DB
 
-func (nw *Network) GetV6Addr() (string, error) {
-	return "", nil
+	err := db.Model(VirtualMachine{}).
+		Joins("JOIN vm_networks ON virtual_machines.id = vm_networks.virtual_machine_id").
+		Where("vm_networks.network_id = ?", nw.ID).
+		Select("virtual_machines.id, virtual_machines.name, vm_networks.ipv4_address, vm_networks.ipv6_address").
+		Find(&vms).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return vms, nil
 }
 
 func MigrateNetwork(db *gorm.DB) *gorm.DB {
 	db.AutoMigrate(&Network{})
 	return db
+}
+
+func GetNetworkByID(id uint) (*Network, error) {
+	var err error
+	var nw Network
+
+	db := database.DB
+	if err = db.Model(nw).First(&nw, id).Error; err != nil {
+		return nil, err
+	}
+
+	return &nw, nil
 }
 
 func CreateNetwork(nw Network) error {

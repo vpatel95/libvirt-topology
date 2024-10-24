@@ -16,6 +16,27 @@ class TopologyServiceType {
         return response.data;
       })
   }
+
+  async get(tid) {
+    return await Axios.get(`${TOPOLOGY_API_PREFIX}/${tid}`)
+      .then(response => {
+        return response.data.data;
+      })
+  }
+
+  async vms(tid) {
+    return await Axios.get(`${TOPOLOGY_API_PREFIX}/${tid}/vms`)
+      .then(response => {
+        return response.data.data;
+      })
+  }
+
+  async networks(tid) {
+    return await Axios.get(`${TOPOLOGY_API_PREFIX}/${tid}/networks`)
+      .then(response => {
+        return response.data.data;
+      })
+  }
 }
 
 const TopologyService = new TopologyServiceType();

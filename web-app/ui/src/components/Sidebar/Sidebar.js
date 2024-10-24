@@ -43,6 +43,34 @@ import {
   Col,
 } from "reactstrap";
 
+var routes = [
+  {
+    path: "/user/dashboard",
+    name: "Dashboard",
+    icon: "ni ni-tv-2 text-primary",
+  },
+  {
+    path: "/user/topologies",
+    name: "Topologies",
+    icon: "ni ni-planet text-blue",
+  },
+  {
+    path: "/user/networks",
+    name: "Networks",
+    icon: "ni ni-pin-3 text-orange",
+  },
+  {
+    path: "/user/virtual-machines",
+    name: "Virtual Machines",
+    icon: "ni ni-bullet-list-67 text-red",
+  },
+  {
+    path: "/user/profile",
+    name: "User Profile",
+    icon: "ni ni-single-02 text-yellow",
+  },
+];
+
 const Sidebar = (props) => {
   const [collapseOpen, setCollapseOpen] = useState();
   // verifies if routeName is the one active (in browser input)
@@ -63,7 +91,7 @@ const Sidebar = (props) => {
       return (
         <NavItem key={key}>
           <NavLink
-            to={prop.layout + prop.path}
+            to={prop.path}
             tag={NavLinkRRD}
             onClick={closeCollapse}
           >
@@ -75,7 +103,7 @@ const Sidebar = (props) => {
     });
   };
 
-  const { bgColor, routes, logo } = props;
+  const { bgColor, logo } = props;
   let navbarBrandProps;
   if (logo && logo.innerLink) {
     navbarBrandProps = {
@@ -200,20 +228,6 @@ const Sidebar = (props) => {
               </Col>
             </Row>
           </div>
-          {/* Form */}
-          <Form className="mt-4 mb-3 d-md-none">
-            <InputGroup className="input-group-rounded input-group-merge">
-              <Input
-                aria-label="Search"
-                className="form-control-rounded form-control-prepended"
-                placeholder="Search"
-                type="search"
-              />
-              <InputGroupText>
-                <span className="fa fa-search" />
-              </InputGroupText>
-            </InputGroup>
-          </Form>
           {/* Navigation */}
           <Nav navbar>{createLinks(routes)}</Nav>
           {/* Divider */}
@@ -260,8 +274,6 @@ Sidebar.defaultProps = {
 };
 
 Sidebar.propTypes = {
-  // links that will be displayed inside the component
-  routes: PropTypes.arrayOf(PropTypes.object),
   logo: PropTypes.shape({
     // innerLink is for links that will direct the user within the app
     // it will be rendered as <Link to="...">...</Link> tag

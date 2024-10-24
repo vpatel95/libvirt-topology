@@ -15,18 +15,15 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
-import { Container, Row, Col, } from "reactstrap";
-import {Navigate} from "react-router-dom";
+import React from 'react';
+import { Container, Row, Col, } from 'reactstrap';
+import {Navigate} from 'react-router-dom';
 
-import {useUser } from "contexts/UserContext";
-import Header from "components/Headers/Header.js";
-import { TopologyTable } from "components/Tables/TopologyTable";
-import { NetworkTable } from "components/Tables/NetworkTable";
+import {useUser } from 'contexts/UserContext';
+import Header from 'components/Headers/Header.js';
+import { TopologyTable, NetworkTable, VirtualMachineTable } from 'components/Tables';
 
-import {VirtualMachineTable} from "components/Tables/VirtualMachineTable";
-
-const Index = (props) => {
+const Dashboard = () => {
   const { user } = useUser();
 
   if (!user.info) {
@@ -43,14 +40,14 @@ const Index = (props) => {
           <Row className="mt-5">
             <Col className="mb-5 mb-xl-0" xl="6">
                 <TopologyTable headers={["Name", "Networks", "VirtualMachines"]} 
-                                topologies={user.objects.topologies.info} />
+                                topologies={user.objects.topologies.info} summary />
                 <VirtualMachineTable
                   headers={["Name", "Flavor", "Memory", "vCPU"]}
-                  vms={user.objects.vms.info} />
+                  vms={user.objects.vms.info} summary />
             </Col>
             <Col xl="6">
                 <NetworkTable headers={["Name", "Type", "Topology"]}
-                              networks={user.objects.networks.info} />
+                              networks={user.objects.networks.info} summary />
             </Col>
           </Row>
         </Container>
@@ -59,4 +56,4 @@ const Index = (props) => {
   }
 };
 
-export default Index;
+export default Dashboard;

@@ -6,21 +6,21 @@ class UserServiceType {
     async topologies(user_id) {
         return await Axios.get(`${USER_API_PREFIX}/${user_id}/topologies`)
             .then(response => {
-                return response.data;
+                return response.data.data;
             })
     }
 
     async networks(user_id) {
         return await Axios.get(`${USER_API_PREFIX}/${user_id}/networks`)
             .then(response => {
-                return response.data;
+                return response.data.data;
             })
     }
 
     async vms(user_id) {
         return await Axios.get(`${USER_API_PREFIX}/${user_id}/vms`)
             .then(response => {
-                return response.data;
+                return response.data.data;
             })
     }
 

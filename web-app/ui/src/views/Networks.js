@@ -15,115 +15,34 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React from 'react';
 import {
-  Button,
   Card,
   CardBody,
   CardHeader,
   Container,
-  Form,
-  FormGroup,
-  Input,
-  Label,
-  Modal,
-  ModalBody,
-  ModalHeader,
-  ModalFooter,
   Row,
-  Table,
-} from "reactstrap";
-import Header from "components/Headers/Header.js";
-import { useUser, UserActions } from "contexts/UserContext";
-import NetworkService from "services/network";
-import {useLocation} from "react-router-dom";
-import {NetworkDetailRow} from "components/Tables/NetworkTable";
-import {TableHeader} from "components/Tables/TableHeader";
-
-export const CreateNetworkModal = ({isOpen, toggle}) => {
-  const { userDispatch } = useUser();
-  const [formData, setFormData] = React.useState({
-    name: '',
-  });
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const createNetwork = () => {
-    NetworkService.create(formData).then(
-      res => {
-        console.log("Network create success : ", res);
-        userDispatch({type: UserActions.SET_NEWDATA, payload: true});
-      },
-      err => {
-        console.error("Topology create error : ", err);
-      }
-    );
-    toggle();
-  };
-
-  return (
-    <div>
-      <Modal isOpen={isOpen} toggle={toggle} size="md">
-        <ModalHeader toggle={toggle}>
-          <h2>Create Network</h2>
-        </ModalHeader>
-        <ModalBody>
-          <Form>
-            <FormGroup>
-              <Label for="networkName">
-                  Network Name
-              </Label>
-              <Input
-                id="networkName"
-                name="name"
-                placeholder="Name"
-                type="text"
-                value={formData.name}
-                onChange={handleChange}
-              />
-            </FormGroup>
-          </Form>
-        </ModalBody>
-        <ModalFooter>
-          <Button color="primary" onClick={createNetwork}>
-            Create
-          </Button>{' '}
-          <Button color="secondary" onClick={toggle}>
-            Cancel
-          </Button>
-        </ModalFooter>
-      </Modal>
-    </div>
-  );
-};
+} from 'reactstrap';
+import {useLoaderData, Link} from 'react-router-dom';
+import {NetworkDetail} from 'components/Networks';
+import {NetworkTable} from 'components/Tables';
+import {CardHeaderSimple} from 'components/Cards';
+import {BaseForm} from 'components/Forms';
 
 const Networks = () => {
-  const { user } = useUser();
+
+  const networks = useLoaderData();
+
   return (
     <>
-      <Header userObjects={user.objects} />
-      <Container className="mt--7" fluid>
+      <Container className="pt-md-8" fluid>
         <Row>
           <div className="col">
-            <Card className="shadow">
-              <CardHeader className="border-0">
-                <h3 className="mb-0">Networks</h3>
-              </CardHeader>
-              <Table className="align-items-center table-flush" responsive>
-                <TableHeader headers={[ "S. No", "Name", "Type",
-                    "IPv4 Address", "IPv6 Address", "Topology ID",
-                    "Delete", "View" ]} />
-                <tbody>
-                {user.objects.networks.info &&
-                  user.objects.networks.info.map((network, idx) => (
-                    <NetworkDetailRow network={network} index={idx + 1} key={network.ID} />
-                  ))
-                }
-                </tbody>
-              </Table>
+            <Card className="shadow mb-3">
+              <NetworkTable
+                headers={["S. No", "Name", "Type", "IPv4 Address", "IPv6 Address",
+                          "Topology ID", "Delete", "View"]}
+                networks={networks} />
             </Card>
           </div>
         </Row>
@@ -133,16 +52,12 @@ const Networks = () => {
 };
 
 export const Network = () => {
-  const { user } = useUser();
-  const location = useLocation();
-  const network = location.state;
+
+  const {network, attachedVms} = useLoaderData();
 
   return (
     <>
-      <Header userObjects={user.objects} />
-      {/* Page content */}
-      <Container className="mt--7" fluid>
-        {/*Table*/}
+      <Container className="pt-md-8" fluid>
         <Row>
           <div className="col">
             <Card>
@@ -154,8 +69,7 @@ export const Network = () => {
                 </Row>
               </CardHeader>
               <CardBody>
-              {/* Network Information */}
-              {/* Liked Virtual Machines */}
+                <NetworkDetail network={network} attachedVms={attachedVms}/>
               </CardBody>
             </Card>
           </div>
@@ -163,6 +77,39 @@ export const Network = () => {
       </Container>
     </>
   )
+};
+
+export const NetworkCreate = () => {
+  const formFields = [
+    {name: 'name', label: 'Name'},
+    {name: 'type', label: 'Type', type: 'select',
+      options: [
+        {label: 'NAT', value: 'nat'},
+        {label: 'Management', value: 'management'},
+        {label: 'Host Only Network', value: 'isolated'}
+      ],
+    },
+    {name: 'subnet4', label: 'Subnet v4' },
+    {name: 'has_v6', label: 'Has v6', type: 'checkbox',
+      conditional : [
+        { name: 'subnet6', label: 'Subnet v6' }
+      ],
+    },
+  ];
+
+  return (
+    <Container className="pt-md-8" fluid>
+      <Row className="align-items-center py-4">
+        <div className="col">
+          <Card className="shadow mb-3">
+            <CardHeaderSimple header={"Create Network"} />
+            <BaseForm formFields={formFields} buttonLabel="Submit" method="POST"
+                action={""} />
+          </Card>
+        </div>
+      </Row>
+    </Container>
+  );
 };
 
 export default Networks;
