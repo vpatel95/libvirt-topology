@@ -2,6 +2,8 @@ import json
 import logging
 import sys
 
+import deployer.globals as globals
+# from .config import NO_NETWORK, NO_VM, PRINT_NETWORK, PRINT_VM
 from .network import Network
 from .virtual_machine import VirtualMachine
 
@@ -23,8 +25,17 @@ class Topology:
         self.networks = {}
         self.vms = {}
 
-        self.CreateNetworks()
-        self.CreateVms()
+        if not globals.NO_NETWORK:
+            self.CreateNetworks()
+
+        if not globals.NO_VM:
+            self.CreateVms()
+
+        if globals.PRINT_NETWORK:
+            self.PrintNetworks()
+
+        if globals.PRINT_VM:
+            self.PrintVms()
 
     def __is_nw_type_valid(self, nw_type: str) -> bool:
         return nw_type in self.supported_network_types_

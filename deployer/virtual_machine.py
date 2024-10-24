@@ -3,7 +3,7 @@ import yaml
 import ipaddress
 
 from .network import Network
-from .config import LIBVIRT_IMAGES, UBUNTU_TEMPLATE
+from .globals import LIBVIRT_IMAGES, UBUNTU_TEMPLATE
 from .utils import ExecuteCommand
 
 class VirtualMachine:
@@ -137,8 +137,11 @@ class VirtualMachine:
                 "search": ['jnpr.net', 'juniper.net', 'englab.juniper.net']
             },
             "gateway4": str(nw.ip4_),
-            "gateway6": str(nw.ip6_)
         }
+
+        if nw.network6_ is not None:
+            nat_nw_config["gateway6"] = str(nw.ip6_)
+
         return nat_nw_config
 
     def __generate_iso_config(self, ip4: str, ip6: str) -> dict:
