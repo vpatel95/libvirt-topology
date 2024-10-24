@@ -45,11 +45,11 @@ const Index = (props) => {
                 <TopologyTable headers={["Name", "Networks", "VirtualMachines"]} 
                                 topologies={user.objects.topologies.info} />
                 <VirtualMachineTable
-                  headers={["Name", "Flavor", "Memory", "vCPU", "Disk", "VNC Port"]}
+                  headers={["Name", "Flavor", "Memory", "vCPU"]}
                   vms={user.objects.vms.info} />
             </Col>
             <Col xl="6">
-                <NetworkTable headers={["Name", "Type", "IPv4", "IPv6", "Topology"]}
+                <NetworkTable headers={["Name", "Type", "Topology"]}
                               networks={user.objects.networks.info} />
             </Col>
           </Row>

@@ -82,7 +82,7 @@ type (
 		VirtualMachineID int    `gorm:"column:virtual_machine_id;primaryKey;constraint:OnDelete:CASCADE"`
 		NetworkID        int    `gorm:"column:network_id;primaryKey;constraint:OnDelete:CASCADE"`
 		IPv4Address      string `gorm:"column:ipv4_address;not null"`
-		IPv6Address      string `gorm:"column:ipv6_address"`
+		IPv6Address      string `gorm:"column:ipv6_address;default:NULL"`
 	}
 )
 

@@ -39,6 +39,7 @@ import { useUser } from "contexts/UserContext";
 import TopologyService from "services/topology";
 import {UserActions} from "contexts/UserContext";
 import {useLocation} from "react-router-dom";
+import {TableHeader} from "components/Tables/TableHeader";
 
 export const CreateTopologyModal = ({isOpen, toggle}) => {
   const { userDispatch } = useUser();
@@ -125,17 +126,8 @@ const Topologies = () => {
                 </Row>
               </CardHeader>
               <Table className="align-items-center text-center table-flush" responsive>
-                <thead className="thead-light">
-                  <tr>
-                    <th scope="col">S. No</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Networks</th>
-                    <th scope="col">Virtual Machines</th>
-                    <th scope="col">Edit</th>
-                    <th scope="col">Delete</th>
-                    <th scope="col">View</th>
-                  </tr>
-                </thead>
+                <TableHeader headers={[ "S. No", "Name", "Networks",
+                    "Virtual Machines", "Edit", "Delete", "View", ]} />
                 <tbody>
                 {user.objects.topologies.info &&
                   user.objects.topologies.info.map((topology, idx) => (

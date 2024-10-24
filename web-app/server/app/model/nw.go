@@ -23,12 +23,12 @@ type (
 		gorm.Model
 		Name       string      `gorm:"column:name;unique_index;not null" json:"name"`
 		Subnet4    string      `gorm:"column:subnet4;not null" json:"subnet4"`
-		PrefixLen4 int         `gorm:"column:prefix_len4" json:"prefix_len4"`
-		AddrV4     string      `gorm:"column:addr_v4" json:"addr_v4"`
-		HasV6      bool        `gorm:"column:has_v6;not null" json:"has_v6"`
-		Subnet6    string      `gorm:"column:subnet6" json:"subnet6"`
-		PrefixLen6 int         `gorm:"column:prefix_len6" json:"prefix_len6"`
-		AddrV6     string      `gorm:"column:addr_v6" json:"addr_v6"`
+		PrefixLen4 int         `gorm:"column:prefix_len4;not null" json:"prefix_len4"`
+		AddrV4     string      `gorm:"column:addr_v4;not null" json:"addr_v4"`
+		HasV6      bool        `gorm:"column:has_v6;not null;default:false" json:"has_v6"`
+		Subnet6    string      `gorm:"column:subnet6;default:NULL" json:"subnet6"`
+		PrefixLen6 int         `gorm:"column:prefix_len6;default:NULL" json:"prefix_len6"`
+		AddrV6     string      `gorm:"column:addr_v6;default:NULL" json:"addr_v6"`
 		Type       NetworkType `gorm:"type:enum('nat', 'isolated', 'management');not null"`
 		TopologyID int         `gorm:"column:topology_id;not null" json:"topology_id"`
 		UserID     int         `gorm:"column:user_id;not null" json:"user_id"`

@@ -25,6 +25,8 @@ import {
 } from "reactstrap";
 import Header from "components/Headers/Header.js";
 import {useUser} from "contexts/UserContext";
+import {VmDetailRow} from "components/Tables/VirtualMachineTable";
+import { TableHeader } from "components/Tables/TableHeader";
 
 const VirtualMachines = () => {
   const { user } = useUser();
@@ -39,17 +41,15 @@ const VirtualMachines = () => {
                 <h3 className="mb-0">Virtual Machines</h3>
               </CardHeader>
               <Table className="align-items-center table-flush" responsive>
-                <thead className="thead-light">
-                  <tr>
-                    <th scope="col">S. No</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Flavor</th>
-                    <th scope="col">Topology ID</th>
-                    <th scope="col" />
-                  </tr>
-                </thead>
+                <TableHeader headers={[ "S. No", "Name", "Flavor",
+                    "RAM", "vCPUs", "Disk", "VNC Port", "Topology ID",
+                    "Edit", "Delete", "View" ]} />
                 <tbody>
-                  { /* add topology detail row */ }
+                {user.objects.vms.info &&
+                  user.objects.vms.info.map((vm, idx) => (
+                    <VmDetailRow vm={vm} index={idx + 1} key={vm.ID} />
+                  ))
+                }
                 </tbody>
               </Table>
             </Card>
