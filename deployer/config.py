@@ -1,6 +1,6 @@
 from pathlib import Path
 
-# TODO: Change to False and make it configurable
+global DRY_RUN
 DRY_RUN = False
 LIBVIRT_BASE_PATH = Path('/var/lib/libvirt')
 LIBVIRT_IMAGES = LIBVIRT_BASE_PATH.joinpath('images')
