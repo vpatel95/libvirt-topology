@@ -58,16 +58,6 @@ class Network:
     def __create_nat_network(self) -> None:
         logging.info("Creating NAT network : {}".format(self.name_))
 
-        try:
-            if not globals.DRY_RUN:
-                NAT_NW_BASE.joinpath(self.name_).mkdir(parents=True)
-        except Exception as e:
-            logging.warning("Nat network {} already exists.".format(self.name_))
-            logging.error(str(e))
-            return
-
-        CheckForwarding()
-
         plen4 = 24
         plen6 = 120
         if self.network4_:
@@ -75,10 +65,27 @@ class Network:
         if self.network6_:
             plen6 = self.network6_.prefixlen
 
+        try:
+            if not globals.DRY_RUN:
+                if not globals.RECREATE_NW:
+                    NAT_NW_BASE.joinpath(self.name_).mkdir(parents=True)
+                else:
+                    AddLinuxBridge(self.name_, str(self.ip4_), str(self.ip6_), plen4, plen6)
+                    return
+        except Exception as e:
+            logging.warning("Nat network {} already exists.".format(self.name_))
+            logging.error(str(e))
+            return
+
+        CheckForwarding()
+
         AddLinuxBridge(self.name_, str(self.ip4_), str(self.ip6_), plen4, plen6)
         AddIptableRules(self.name_, str(self.network4_))
 
     def __create_management_network(self) -> None:
+        if globals.RECREATE_NW:
+            return
+
         logging.info("Creating Management network : {}".format(self.name_))
         nw_cfg_file = LIBVIRT_QEMU_NW.joinpath("{}.xml".format(self.name_))
 
@@ -114,6 +121,9 @@ class Network:
 
 
     def __create_isolated_network(self) -> None:
+        if globals.RECREATE_NW:
+            return
+
         logging.info("Creating Isolated network : {}".format(self.name_))
         nw_cfg_file = LIBVIRT_QEMU_NW.joinpath("{}.xml".format(self.name_))
 
