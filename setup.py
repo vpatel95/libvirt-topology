@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fhand:
 
 setuptools.setup(
     name="topology-deployer",
-    version="0.0.3",
+    version="0.0.4",
     author="Ved Patel",
     description=("A python tool to deploy topology "
                 "defined in a json config"),
