@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fhand:
 
 setuptools.setup(
     name="topology-deployer",
-    version="0.0.4",
+    version="0.1.0",
     author="Ved Patel",
     description=("A python tool to deploy topology "
                 "defined in a json config"),
@@ -20,7 +20,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: POSIX :: Linux",
     ],
-    install_requires=["pyyaml", "ipaddress"],
+    install_requires=["pyyaml", "ipaddress", "psutil"],
     packages=setuptools.find_packages(),
     python_requires=">=3.6",
     entry_points={
