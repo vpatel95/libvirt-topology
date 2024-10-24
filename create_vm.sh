@@ -15,7 +15,7 @@ function usage() {
 
 function create_pe() {
     VM_NAME=${1}
-    VNC_PORT=${3}
+    VNC_PORT=${2}
     sudo virt-install \
         --virt-type kvm \
         --name ${VM_NAME} \
@@ -35,7 +35,7 @@ function create_pe() {
 
 function create_ce() {
     VM_NAME=${1}
-    VNC_PORT=${3}
+    VNC_PORT=${2}
     sudo virt-install \
         --virt-type kvm \
         --name ${VM_NAME} \
@@ -54,7 +54,7 @@ function create_ce() {
 
 function create_dev() {
     VM_NAME=${1}
-    VNC_PORT=${3}
+    VNC_PORT=${2}
     sudo virt-install \
         --virt-type kvm \
         --name ${VM_NAME} \
