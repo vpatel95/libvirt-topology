@@ -5,6 +5,7 @@ sudo apt-get update
 # Required packages for kvm
 sudo apt-get install -y \
     bridge-utils \
+    cloud-utils \
     cpu-checker \
     libvirt-clients \
     libvirt-daemon \
