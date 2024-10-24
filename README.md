@@ -1,3 +1,5 @@
+![build](https://github.com/vpatel95/topology-deployer/actions/workflows/python-app.yml/badge.svg)
+
 # topology-deployer
 Python tool to deploy topologies on Ubuntu from the defined json config files.
 
