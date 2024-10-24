@@ -1,8 +1,8 @@
-import json
 import logging
 import sys
 
 import deployer.globals as globals
+
 
 class Topology:
     networks_ = {}
@@ -19,7 +19,7 @@ class Topology:
             sys.exit(2)
 
         self.networks_[name] = nw
-    #end AddNetwork
+    # end AddNetwork
 
     def AddVm(self, name, vm):
         if self.__is_existing_vm(name):
@@ -27,7 +27,7 @@ class Topology:
             sys.exit(2)
 
         self.vms_[name] = vm
-    #end AddVm
+    # end AddVm
 
     def Delete(self):
         if not globals.NO_VM:
@@ -35,7 +35,7 @@ class Topology:
 
         if not globals.NO_NETWORK:
             self.__delete_networks()
-    #end Delete
+    # end Delete
 
     def Create(self):
         if not globals.NO_NETWORK:
@@ -45,49 +45,50 @@ class Topology:
             self.__create_vms()
 
         # Add Print Topology here
-    #end __create
+    # end __create
 
     def GetNetwork(self, name):
         return self.networks_.get(name, None)
-    #end GetNetwork
+    # end GetNetwork
 
     def Networks(self):
         return self.networks_.items()
-    #end Networks
+    # end Networks
 
     def Vms(self):
         return self.vms_.items()
-    #end Vms
+    # end Vms
 
     def __create_networks(self):
         for _, nw in self.networks_.items():
             nw.Create()
-    #end __create_networks
+    # end __create_networks
 
     def __create_vms(self):
         for _, vm in self.vms_.items():
             vm.Create()
-    #end __create_vms
+    # end __create_vms
 
     def __delete_networks(self):
         for _, nw in self.networks_.items():
             nw.Delete()
-    #end __delete_networks
+    # end __delete_networks
 
     def __delete_vms(self):
         for _, vm in self.vms_.items():
             vm.Delete()
-    #end __delete_vms
+    # end __delete_vms
 
     def __is_existing_network(self, name):
         nw = self.networks_.get(name, None)
         if nw is None:
             return False
         return True
-    #end __is_existing_network
+    # end __is_existing_network
+
     def __is_existing_vm(self, name):
         vm = self.vms_.get(name, None)
         if vm is None:
             return False
         return True
-    #end __is_existing_vm
+    # end __is_existing_vm
