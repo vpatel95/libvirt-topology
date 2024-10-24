@@ -30,6 +30,26 @@ To install from source
 sudo pip3 install .
 ```
 
+### Options
+Parse topology config
+
+```
+optional arguments:
+  -h, --help            show this help message and exit
+  -c CONFIG, --config CONFIG
+                        JSON Config file that defines the topology
+  -l {DEBUG,INFO,WARNING,ERROR,CRITICAL}, --log {DEBUG,INFO,WARNING,ERROR,CRITICAL}
+                        Set the log level
+  --dry-run             Instead of executing, print the commands
+  -o {create,delete,CREATE,DELETE}, --operation {create,delete,CREATE,DELETE}
+                        Operation to create or delete topology from the JSON Config
+  --recreate-nw         [PREVIEW] Recreate the nat network
+  --print-nw            Print out created network details
+  --print-vm            Print out created VM details
+  --no-network          Skip creating networks. Cannot be used with --no-vm
+  --no-vm               Skip creating vms. Cannot be used with --no-network
+```
+
 ### Creating Topologies <a name = "create"></a>
 A JSON cofig is taken as input. Check [here](#json_conf) for guide to define config
 
@@ -158,4 +178,3 @@ To define networks for the vm, you have to use the network name as key and provi
 
 1. [2PE-CE](topologies/2PE-CE.json)
 2. [2PE-2PSWITCH-2CE](topologies/sr-mpls.json)
-
