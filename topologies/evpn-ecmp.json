@@ -1,30 +1,38 @@
 {
-    "networks" : {
-        "nat": [{
+    "version": 2,
+    "networks" : [
+        {
             "name": "evpn-br1",
+            "type": "nat",
             "subnet4": "10.10.1.0/24",
             "subnet6": "1234::10.10.1.0/120"
-        }, {
+        },
+        {
             "name": "evpn-br2",
+            "type": "nat",
             "subnet4": "10.10.2.0/24",
             "subnet6": "1234::10.10.2.0/120"
-        }],
-        "isolated": [{
-            "name": "evpn-br-iso1"
-        }, {
-            "name": "evpn-br-iso2"
-        }],
-        "management": [{
-            "name": "evpn-br-mgmt1",
+        },
+        {
+            "name": "evpn-iso1",
+            "type": "isolated"
+        },
+        {
+            "name": "evpn-iso2",
+            "type": "isolated"
+        },
+        {
+            "name": "evpn-mgmt1",
+            "type": "management",
             "subnet4": "10.25.1.0/24"
-        }]
-    },
+        }
+    ],
     "vms" : [{
         "name": "evpn-pe1",
         "flavor": "pe",
         "vnc_port": 5901,
         "networks": {
-            "evpn-br-mgmt1": {
+            "evpn-mgmt1": {
                 "v4": "10.25.1.10"
             },
             "evpn-br1": {
@@ -35,11 +43,11 @@
                 "v4": "10.10.2.10",
                 "v6": "1234::10.10.2.10"
             },
-            "evpn-br-iso1": {
+            "evpn-iso1": {
                 "v4": "10.10.14.10",
                 "v6": "1234::10.10.14.10"
             },
-            "evpn-br-iso2": {
+            "evpn-iso2": {
                 "v4": "10.10.15.10",
                 "v6": "1234::10.10.15.10"
             }
@@ -49,7 +57,7 @@
         "flavor": "pe",
         "vnc_port": 5902,
         "networks": {
-            "evpn-br-mgmt1": {
+            "evpn-mgmt1": {
                 "v4": "10.25.1.20"
             },
             "evpn-br1": {
@@ -60,11 +68,11 @@
                 "v4": "10.10.2.20",
                 "v6": "1234::10.10.2.20"
             },
-            "evpn-br-iso1": {
+            "evpn-iso1": {
                 "v4": "10.10.24.20",
                 "v6": "1234::10.10.24.20"
             },
-            "evpn-br-iso2": {
+            "evpn-iso2": {
                 "v4": "10.10.25.20",
                 "v6": "1234::10.10.25.20"
             }
@@ -74,7 +82,7 @@
         "flavor": "pe",
         "vnc_port": 5903,
         "networks": {
-            "evpn-br-mgmt1": {
+            "evpn-mgmt1": {
                 "v4": "10.25.1.30"
             },
             "evpn-br1": {
@@ -85,11 +93,11 @@
                 "v4": "10.10.2.30",
                 "v6": "1234::10.10.2.30"
             },
-            "evpn-br-iso1": {
+            "evpn-iso1": {
                 "v4": "10.10.24.30",
                 "v6": "1234::10.10.24.30"
             },
-            "evpn-br-iso2": {
+            "evpn-iso2": {
                 "v4": "10.10.25.30",
                 "v6": "1234::10.10.25.30"
             }
@@ -99,14 +107,14 @@
         "flavor": "ce",
         "vnc_port": 5904,
         "networks": {
-            "evpn-br-mgmt1": {
+            "evpn-mgmt1": {
                 "v4": "10.25.1.11"
             },
-            "evpn-br-iso1": {
+            "evpn-iso1": {
                 "v4": "10.10.14.11",
                 "v6": "1234::10.10.14.11"
             },
-            "evpn-br-iso2": {
+            "evpn-iso2": {
                 "v4": "10.10.15.11",
                 "v6": "1234::10.10.15.11"
             },
@@ -120,14 +128,14 @@
         "flavor": "ce",
         "vnc_port": 5905,
         "networks": {
-            "evpn-br-mgmt1": {
+            "evpn-mgmt1": {
                 "v4": "10.25.1.21"
             },
-            "evpn-br-iso1": {
+            "evpn-iso1": {
                 "v4": "10.10.24.21",
                 "v6": "1234::10.10.24.21"
             },
-            "evpn-br-iso2": {
+            "evpn-iso2": {
                 "v4": "10.10.25.21",
                 "v6": "1234::10.10.25.21"
             },
