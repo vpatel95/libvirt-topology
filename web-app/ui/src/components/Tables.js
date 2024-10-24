@@ -34,16 +34,18 @@ export const TableHeader = ({headers}) => {
   );
 };
 
-export const TopologyTable = ({headers, topologies, summary}) => {
+export const TopologyTable = (props) => {
+
+  const {headers, topologies, setTopologies, summary} = props;
 
   var TopologyRow = summary ?
     <TopologySummaryRow topologies={topologies} /> :
-    <TopologyDetailRow topologies={topologies} />;
+    <TopologyDetailRow topologies={topologies} setTopologies={setTopologies} />;
 
   var TitleElement = summary ?
-    <CardHeaderWithButton header={'Topologies'} label={'See All'} link={'/user/topologies'}/> :
+    <CardHeaderWithButton header={'Topologies'} label={'See All'} link={'/topologies'}/> :
     <CardHeaderWithButton header={'Topologies'} label={'Create'}
-      link={'/user/topologies/create'} size={'md'} />;
+      link={'/topologies/create'} size={'md'} />;
 
 
   return (
@@ -51,33 +53,37 @@ export const TopologyTable = ({headers, topologies, summary}) => {
   );
 };
 
-export const NetworkTable = ({headers, networks, summary}) => {
+export const NetworkTable = (props) => {
+
+  const {headers, networks, setNetworks, summary} = props;
 
   var NetworkRow = summary ?
     <NetworkSummaryRow networks={networks} /> :
-    <NetworkDetailRow networks={networks} />;
+    <NetworkDetailRow networks={networks} setNetworks={setNetworks} />;
 
   var TitleElement = summary ?
-    <CardHeaderWithButton header={'Networks'} label={'See All'} link={'/user/networks'}/> :
+    <CardHeaderWithButton header={'Networks'} label={'See All'} link={'/networks'}/> :
     <CardHeaderWithButton header={'Networks'} label={'Create'}
-      link={'/user/networks/create'} size={'md'} />;
+      link={'/networks/create'} size={'md'} />;
 
   return (
     <BaseTable title={TitleElement} headers={headers} row={NetworkRow} />
   );
 };
 
-export const VirtualMachineTable = ({headers, vms, summary}) => {
+export const VirtualMachineTable = (props) => {
+
+  const {headers, vms, setVms, summary} = props;
 
   var VmRow = summary ?
     <VmSummaryRow vms={vms} /> :
-    <VmDetailRow vms={vms} />;
+    <VmDetailRow vms={vms} setVms={setVms} />;
 
   var TitleElement = summary ?
     <CardHeaderWithButton header={'Virtual Machines'} label={'See All'}
-      link={'/user/virtual-machines'}/> :
+      link={'/virtual-machines'}/> :
     <CardHeaderWithButton header={'Virtual Machines'} label={'Create'}
-      link={'/user/virtual-machines/create'} size={'md'} />;
+      link={'/virtual-machines/create'} size={'md'} />;
 
   return (
     <BaseTable title={TitleElement} headers={headers} row={VmRow} />

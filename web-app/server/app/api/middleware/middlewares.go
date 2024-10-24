@@ -68,7 +68,8 @@ func ValidateSessionID() gin.HandlerFunc {
 		if err != nil {
 			log.Println("[ValidateSessionID] ::: Failed to get token : " + err.Error())
 			c.AbortWithStatusJSON(http.StatusUnauthorized, JSON{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -77,7 +78,8 @@ func ValidateSessionID() gin.HandlerFunc {
 		if err != nil {
 			log.Println("data : " + err.Error())
 			c.AbortWithStatusJSON(http.StatusUnauthorized, JSON{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -85,7 +87,8 @@ func ValidateSessionID() gin.HandlerFunc {
 		if _, ok := data["user"]; !ok {
 			log.Println("key user not found")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, JSON{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -97,7 +100,8 @@ func ValidateSessionID() gin.HandlerFunc {
 		if err != nil {
 			log.Println("[ValidateSessionID] ::: Failed to get session : " + err.Error())
 			c.AbortWithStatusJSON(http.StatusUnauthorized, JSON{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -111,11 +115,13 @@ func ValidateSessionID() gin.HandlerFunc {
 func Authorization() gin.HandlerFunc {
 	log.Println("In Authorization")
 	return func(c *gin.Context) {
+		sessionManager.ListSessions()
 		sess, err := sessionManager.SessionRead(c.Request)
 		if err != nil {
 			log.Println("get sess : " + err.Error())
 			c.AbortWithStatusJSON(http.StatusUnauthorized, JSON{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -123,7 +129,8 @@ func Authorization() gin.HandlerFunc {
 		if ok := sess.Exist("user_id"); !ok {
 			log.Println("user exist : " + err.Error())
 			c.AbortWithStatusJSON(http.StatusUnauthorized, JSON{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -139,7 +146,8 @@ func IsSelfUser() gin.HandlerFunc {
 		var sess *Session
 		if sess = common.GetSession(c); sess == nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -148,7 +156,8 @@ func IsSelfUser() gin.HandlerFunc {
 		currUserID = sess.Get("user_id").(int)
 		if currUserID != id {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -163,7 +172,8 @@ func IsUserTopology() gin.HandlerFunc {
 		var topology Topology
 		if sess = common.GetSession(c); sess == nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -175,14 +185,16 @@ func IsUserTopology() gin.HandlerFunc {
 		err := db.First(&topology, id).Error
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-				"message": "Topology not found",
+				"status": "failure",
+				"data":   "Topology not found",
 			})
 			return
 		}
 
 		if currUserID != topology.UserID {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -196,7 +208,8 @@ func IsUserVm() gin.HandlerFunc {
 		var sess *Session
 		if sess = common.GetSession(c); sess == nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -208,14 +221,16 @@ func IsUserVm() gin.HandlerFunc {
 		err := db.First(&VirtualMachine{}, "id = ? AND user_id = ?", id, currUserID).Error
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
 
 		if currUserID != id {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -229,7 +244,8 @@ func IsUserNw() gin.HandlerFunc {
 		var sess *Session
 		if sess = common.GetSession(c); sess == nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
@@ -241,14 +257,16 @@ func IsUserNw() gin.HandlerFunc {
 		err := db.First(&Network{}, "id = ? AND user_id = ?", id, currUserID).Error
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}
 
 		if currUserID != id {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"message": "Unauthorized",
+				"status": "failure",
+				"data":   "Unauthorized",
 			})
 			return
 		}

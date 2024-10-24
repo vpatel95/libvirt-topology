@@ -1,22 +1,3 @@
-/*!
-
-=========================================================
-* Argon Dashboard React - v1.2.3
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/argon-dashboard-react/blob/master/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-
-// reactstrap components
 import {Link} from "react-router-dom";
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
 
@@ -28,7 +9,7 @@ export const HeaderCard = ({userObject}) => {
           <Row>
             <div className="col">
               <CardTitle tag="h5" className="text-uppercase text-muted mb-0" >
-                <Link to={"/user/" + userObject.link} >{userObject.name}</Link>
+                <Link to={"/" + userObject.link} >{userObject.name}</Link>
               </CardTitle>
               <span className="h2 font-weight-bold mb-0">
                 {userObject.size}

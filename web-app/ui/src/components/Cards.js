@@ -1,16 +1,16 @@
 import React from "react";
-import {CardHeader, Row} from "reactstrap";
-import {ButtonLink} from "./Buttons";
+import {useNavigate} from "react-router-dom";
+import {Button, CardHeader, Row} from "reactstrap";
 
-export const CardHeaderWithButton = ({header, label, link, color, size}) => {
+export const CardHeaderWithButton = ({header, label, link, ...buttonProps}) => {
+  const navigate = useNavigate();
   return (
     <CardHeader className="border-0">
       <Row className="align-items-center">
         <div className="col">
           <h3 className="mb-0">{header}</h3>
         </div>
-        <ButtonLink label={label} link={link}
-          color={color} size={size} />
+        <Button onClick={() => navigate(link)} {...buttonProps} >{label}</Button>
       </Row>
     </CardHeader>
   );

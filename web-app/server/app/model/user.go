@@ -10,13 +10,13 @@ import (
 type (
 	User struct {
 		gorm.Model
-		Name            string `gorm:"column:name;not null" json:"name"`
-		Email           string `gorm:"column:email;unique;not null" json:"email"`
-		Username        string `gorm:"column:username;unique;not null" json:"username"`
-		Password        string `gorm:"column:password;not null;not null" json:"password"`
-		Topologies      []Topology
-		Networks        []Network
-		VirtualMachines []VirtualMachine
+		Name            string           `gorm:"column:name;not null" json:"name"`
+		Email           string           `gorm:"column:email;unique;not null" json:"email"`
+		Username        string           `gorm:"column:username;unique;not null" json:"username"`
+		Password        string           `gorm:"column:password;not null;not null" json:"password"`
+		Topologies      []Topology       `gorm:"constraint:OnDelete:CASCADE"`
+		Networks        []Network        `gorm:"constraint:OnDelete:CASCADE"`
+		VirtualMachines []VirtualMachine `gorm:"constraint:OnDelete:CASCADE"`
 	}
 
 	LoginRB struct {

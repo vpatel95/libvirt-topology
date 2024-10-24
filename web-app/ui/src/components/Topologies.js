@@ -5,27 +5,24 @@ import {
   CardBody,
   CardHeader,
   Col,
-  Form,
-  FormGroup,
-  Input,
-  Label,
-  Modal,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
   Row,
   Table,
 } from 'reactstrap';
+import {Link, useNavigate, useParams} from 'react-router-dom';
+import {toast} from 'react-toastify';
+import {TopologyAPI} from 'services/api';
 import { getMemory, getFlavor, getNetworkType } from 'utils';
-import {Link} from 'react-router-dom';
-import TopologyService from 'services/topology';
-import {UserActions, useUser} from 'contexts/UserContext';
 
-export const TopologyNetworkDetail = ({tname, networks}) => {
-  const [modal, setModal] = React.useState(false);
+export const TopologyNetworkDetail = (props) => {
 
-  const toggle = () => setModal(!modal);
+  const topologyId = useParams();
+  const navigate = useNavigate();
 
+  const addNetwork = () => {
+    navigate("/networks/create", {state: topologyId});
+  };
+
+  const {tname, networks, edit} = props;
   return (
     <Row className="mb-3">
       <div className="col">
@@ -33,8 +30,13 @@ export const TopologyNetworkDetail = ({tname, networks}) => {
           <CardHeader className="border-0">
             <Row className="align-items-center">
               <div className="col">
-                <h3>{ tname } Networks</h3>
+                <h3 className="mb-0">{ tname } Networks</h3>
               </div>
+              {edit && (
+                <Button onClick={addNetwork} color={"default"} className="mr-3">
+                  Add Network
+                </Button>
+              )}
             </Row>
           </CardHeader>
           <CardBody>
@@ -47,9 +49,6 @@ export const TopologyNetworkDetail = ({tname, networks}) => {
                       <Row className="align-items-center">
                         <div className="col">
                           <h3 className="mb-0">{network.name}</h3>
-                        </div>
-                        <div className="col text-right">
-                          <i className="fas fa-pencil" size="md" onClick={toggle} style={{cursor: 'pointer'}}/>
                         </div>
                       </Row>
                     </CardHeader>
@@ -96,11 +95,15 @@ export const TopologyVmDetail = ({tname, vms}) => {
             { vms &&
               vms.map((vm) => (
                 <Col xs={12} sm={6} lg={3} key={tname + "-vm" + vm.ID} >
-                  <Card className="shadow">
-                    <CardHeader className="border-0">
-                      <h3 className="mb-0">{vm.name}</h3>
+                  <Card className="mb-3 border-light rounded">
+                    <CardHeader className="border-0 bg-light">
+                      <Row className="align-items-center">
+                        <div className="col">
+                          <h3 className="mb-0">{vm.name}</h3>
+                        </div>
+                      </Row>
                     </CardHeader>
-                    <Table striped responsive>
+                    <Table responsive>
                       <tbody>
                         <tr>
                           <th>Flavor</th><td>{getFlavor(vm.flavor)}</td>
@@ -131,18 +134,20 @@ export const TopologyVmDetail = ({tname, vms}) => {
   );
 };
 
-export const TopologyDetailRow = ({topologies}) => {
+export const TopologyDetailRow = (props) => {
 
-  const { userDispatch } = useUser();
+  const {topologies, setTopologies} = props;
 
   const deleteTopology = (id) => {
-    TopologyService.delete(id).then(
+    TopologyAPI.delete(id).then(
       res => {
         console.log("Topology deleted successfully : ", res);
-        userDispatch({type: UserActions.SET_NEWDATA, payload: true});
+        setTopologies(topologies.filter((topology) => topology.ID !== id));
+        toast.success('Topology Successfully Deleted');
       },
       err => {
         console.error("Topology delete error : ", err);
+        toast.error('Topology Delete Error');
       }
     );
   }
@@ -161,14 +166,16 @@ export const TopologyDetailRow = ({topologies}) => {
           <td>{topology.Networks.length}</td>
           <td>{topology.VirtualMachines.length}</td>
           <td>
-            <i className="fas fa-pencil" style={{cursor: 'pointer'}} />
+            <Link to={"/topologies/" + topology.ID + "/edit"} state={{edit: true}}>
+              <i className="fas fa-pencil" style={{cursor: 'pointer'}} />
+            </Link>
           </td>
           <td>
             <i className="fas fa-trash" style={{cursor: 'pointer', color: 'red'}}
                 onClick={deleteTopology.bind(this, topology.ID)} />
           </td>
           <td>
-            <Link to={"/user/topologies/" + topology.ID} >
+            <Link to={"/topologies/" + topology.ID} >
               <i className="fas fa-eye" style={{cursor: 'pointer', color: 'green'}} />
             </Link>
           </td>
@@ -179,14 +186,17 @@ export const TopologyDetailRow = ({topologies}) => {
   );
 };
 
-export const TopologySummaryRow = ({topologies}) => {
+export const TopologySummaryRow = (props) => {
+
+  const {topologies} = props;
+
   return (
     <tbody>
     {topologies &&
       topologies.map((topology) => (
         <tr key={topology.ID}>
           <th scope="row">
-            <Link to={"/user/topologies/" + topology.ID} state={topology}>
+            <Link to={"/topologies/" + topology.ID} state={topology}>
               {topology.name}
             </Link>
           </th>

@@ -84,22 +84,6 @@ func (n *Network) Load(data JSON) {
 	}
 }
 
-func (nw *Network) GetAttachedVms() ([]AttachedVms, error) {
-	var vms []AttachedVms
-	db := database.DB
-
-	err := db.Model(VirtualMachine{}).
-		Joins("JOIN vm_networks ON virtual_machines.id = vm_networks.virtual_machine_id").
-		Where("vm_networks.network_id = ?", nw.ID).
-		Select("virtual_machines.id, virtual_machines.name, vm_networks.ipv4_address, vm_networks.ipv6_address").
-		Find(&vms).Error
-	if err != nil {
-		return nil, err
-	}
-
-	return vms, nil
-}
-
 func MigrateNetwork(db *gorm.DB) *gorm.DB {
 	db.AutoMigrate(&Network{})
 	return db
@@ -143,4 +127,36 @@ func CreateNetwork(nw Network) error {
 
 	db := database.DB
 	return db.Create(&nw).Error
+}
+
+func (nw *Network) BeforeDelete(db *gorm.DB) error {
+	var count int64
+	db.Where("network_id = ?", nw.ID).Count(&count)
+
+	if count > 0 {
+		return gorm.ErrForeignKeyViolated
+	}
+
+	return nil
+}
+
+func DeleteNetwork(nw *Network) error {
+	db := database.DB.Unscoped()
+	return db.Delete(nw).Error
+}
+
+func (nw *Network) GetAttachedVms() ([]AttachedVms, error) {
+	var vms []AttachedVms
+	db := database.DB
+
+	err := db.Model(VirtualMachine{}).
+		Joins("JOIN vm_networks ON virtual_machines.id = vm_networks.virtual_machine_id").
+		Where("vm_networks.network_id = ?", nw.ID).
+		Select("virtual_machines.id, virtual_machines.name, vm_networks.ipv4_address, vm_networks.ipv6_address").
+		Find(&vms).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return vms, nil
 }

@@ -5,13 +5,24 @@ import (
 	"gorm.io/gorm"
 )
 
-type Topology struct {
-	gorm.Model
-	Name            string           `gorm:"column:name;unique;not null" json:"name"`
-	UserID          int              `gorm:"column:user_id;not null" json:"user_id"`
-	Networks        []Network        `gorm:"constraint:OnDelete:CASCADE;default:NULL"`
-	VirtualMachines []VirtualMachine `gorm:"constraint:OnDelete:CASCADE;default:NULL"`
-}
+const (
+	NotReady TopologyStatus = "not_ready"
+	Ready    TopologyStatus = "ready"
+	Deployed TopologyStatus = "deployed"
+	Deleted  TopologyStatus = "deleted"
+)
+
+type (
+	TopologyStatus string
+	Topology       struct {
+		gorm.Model
+		Name            string           `gorm:"column:name;unique;not null" json:"name"`
+		Status          TopologyStatus   `gorm:"type:enum('not_ready','ready','deployed','deleted');default:not_ready" json:"status"`
+		UserID          int              `gorm:"column:user_id;not null" json:"user_id"`
+		VirtualMachines []VirtualMachine `gorm:"constraint:OnDelete:CASCADE;default:NULL"`
+		Networks        []Network        `gorm:"constraint:OnDelete:CASCADE;default:NULL"`
+	}
+)
 
 func (t *Topology) Serialize() JSON {
 	return JSON{
