@@ -3,6 +3,7 @@ from pathlib import Path
 DRY_RUN = False
 NO_NETWORK = False
 NO_VM = False
+RECREATE_NW = False
 PRINT_NETWORK = False
 PRINT_VM = False
 
