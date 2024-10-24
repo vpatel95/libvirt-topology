@@ -6,7 +6,11 @@ const SessionStore = {
   getToken: () => { return token; },
   setUser: _user => { user = _user; },
   getUser: () => { return user; },
-  isAuthenticated: () => { return !!(token); }
+  isAuthenticated: () => { return !!(token); },
+  resetSession: () => {
+    token = null;
+    user = null;
+  }
 }
 
 export {

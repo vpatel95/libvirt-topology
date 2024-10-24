@@ -44,6 +44,7 @@
     "sass": "1.69.5"
   },
   "devDependencies": {
+    "ajv": "^8.17.1",
     "gulp": "4.0.2",
     "gulp-append-prepend": "1.0.9"
   },

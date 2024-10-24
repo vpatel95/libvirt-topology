@@ -1,44 +1,45 @@
 import axios from 'axios';
-import { redirect } from 'react-router-dom';
 import {SessionStore} from './store';
 
-const BASE_URL = 'http://10.87.1.25:5000/api';
+const BASE_URL = 'http://172.31.15.220:5000/api';
+const AUTH_API_PREFIX = '/auth';
+const TOPOLOGY_API_PREFIX = '/topology';
+const NETWORK_API_PREFIX = '/network';
+const USER_API_PREFIX = '/user';
+const VM_API_PREFIX = '/vm';
+
 
 const Axios = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
 });
 
-Axios.interceptors.request.use(
-  config => {
-    const controller = new AbortController();
-    config.signal = controller.signal;
-    const accessToken = SessionStore.getToken();
-    if (accessToken) {
-      config.headers.Authorization = `${accessToken}`;
-    }
+export const setupInterceptors = (navigate) => {
+    Axios.interceptors.request.use(
+        config => {
+            const controller = new AbortController();
+            config.signal = controller.signal;
+            const accessToken = SessionStore.getToken();
+            if (accessToken) {
+                config.headers.Authorization = `${accessToken}`;
+            }
 
-    return config;
-  }, (error) => Promise.reject(error)
-);
+            return config;
+        }, (error) => Promise.reject(error)
+    );
 
-Axios.interceptors.response.use(
-  response => response,
-  async (error) => {
-    console.error(error);
-    if (error?.response?.status === 401) {
-      // TODO: Come up with proper wording
-      redirect('/auth/login', {replace: true});
-    }
-    return Promise.reject(error);
-  }
-);
-
-const AUTH_API_PREFIX = '/auth';
-const TOPOLOGY_API_PREFIX = '/topology';
-const NETWORK_API_PREFIX = '/network';
-const USER_API_PREFIX = '/user';
-const VM_API_PREFIX = '/vm';
+    Axios.interceptors.response.use(
+        response => response,
+        async (error) => {
+            if (error?.response?.status === 401) {
+                SessionStore.resetSession();
+                navigate('/auth/login', {replace: true});
+            } else {
+                return Promise.reject(error);
+            }
+        }
+    );
+}
 
 const AuthAPI = {
   login: (username, password) => {

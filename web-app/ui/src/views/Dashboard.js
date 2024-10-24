@@ -14,7 +14,7 @@ export const loader = async () => {
     .then(response => {
       return { data: response }
     }, error => {
-      return { error };
+      return error;
     });
 
   return data;

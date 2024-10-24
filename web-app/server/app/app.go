@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -40,12 +39,6 @@ func Init(conf *db.DBConfig) {
 	}
 
 	db.DB = model.Migration(db.DB)
-
-	// Use Authorization Header instead of Cookie
-	sm.Config.CleanerInterval = 1 * time.Second
-	sm.Config.EnableHttpHeader = true
-	sm.Config.SessionHeader = "Authorization"
-	sm.Config.MaxLifetime = 1 * time.Hour
 
 	route.InitRouter()
 }

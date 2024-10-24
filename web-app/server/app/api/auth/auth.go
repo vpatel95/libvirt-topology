@@ -2,7 +2,6 @@ package auth
 
 import (
 	"errors"
-	"log"
 	"net/http"
 
 	valid "github.com/asaskevich/govalidator"
@@ -27,7 +26,7 @@ func register(c *gin.Context) {
 	var user User
 	var err error
 
-	if err := c.ShouldBindJSON(&user); err != nil {
+	if err = c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": errors.New("Invalid request parameters"),
 		})
@@ -82,8 +81,6 @@ func login(c *gin.Context) {
 	}
 
 	sid, _ := generateToken(user.Serialize())
-
-	log.Println("set sid : " + sid)
 
 	// c.SetCookie(sm.Cookie.Name, sid,
 	// 	int(sm.Config.MaxLifetime.Seconds()), "/", "", false, true)
