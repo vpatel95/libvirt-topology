@@ -229,5 +229,8 @@ class VirtualMachine:
         vm_str = ""
         vm_str += "Flavor : {}\n".format(self.flavor_)
         vm_str += "VNC : {}\n".format(self.vnc_port_)
+        vm_str += "Networks : \n"
+        for nw, ips in self.networks_.items():
+            vm_str += "\t{} :\n\t\tv4 : {}\n\t\tv6 : {}\n".format(nw, ips.get("v4", None), ips.get("v6", None)) 
         vm_str += "===================================\n"
         return vm_str
