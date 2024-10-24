@@ -53,13 +53,12 @@ const Login = () => {
       SessionStore.setUser(user);
       navigate(from, { replace: true});
     }, error => {
-        console.error(error);
         const errMsg =
           (error?.response?.data?.message) ||
             error.message ||
             error.toString();
         // TODO: Mask the API error
-        toast.error("2 : ", errMsg);
+        toast.error("Login error : " + errMsg);
         setLoginData(initialData);
     })
   }

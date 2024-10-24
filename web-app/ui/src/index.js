@@ -60,10 +60,20 @@ import {
   loader as createVmLoader,
   action as createVmAction,
 } from "views/CreateVirtualMachine";
-
 import { AuthWrapper } from "wrapper/AuthWrapper";
+import { setupInterceptors } from "services/api";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 const Root = () => {
+  const navigate = useNavigate();
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  if (!isLoaded) {
+    setIsLoaded(true);
+    setupInterceptors(navigate);
+  }
+
   return (
     <>
       <ToastContainer

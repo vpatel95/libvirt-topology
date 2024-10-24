@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -26,7 +26,7 @@ func generateToken(data JSON) (string, error) {
 
 	keyPath := filepath.Join(env.JWTSecret)
 
-	key, err := ioutil.ReadFile(keyPath)
+	key, err := os.ReadFile(keyPath)
 	if err != nil {
 		log.Println("[generateToken} ::: Key file read error = " + err.Error())
 		return "", err
