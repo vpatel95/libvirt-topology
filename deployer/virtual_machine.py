@@ -377,8 +377,19 @@ class VirtualMachine:
         ExecuteCommand(cmd)
     # end __execute_virt_install_cmd
 
+    def __start_vm(self):
+        cmd = f"sudo virsh start {self.name_}"
+        ExecuteCommand(cmd)
+    # end __start_vm
+
     def Create(self):
         logging.info(f"Creating Virtual Machine : {self.name_}")
+
+        # Incase of recovery after reboot, just start the
+        # VM after network creations
+        if G.REBOOT_RECOVERY:
+            self.__start_vm()
+            return
 
         self.__generate_cloud_init_config()
         self.__generate_netplan_config()
