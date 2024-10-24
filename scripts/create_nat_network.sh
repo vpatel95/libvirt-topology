@@ -32,26 +32,32 @@ BR_BROADCAST_IP=${5}
 MAC_ADDR=$(hexdump -vn3 -e '/3 "52:54:00"' -e '/1 ":%02x"' -e '"\n"' /dev/urandom)
 IP4_FORWARD=$(cat /proc/sys/net/ipv4/ip_forward)
 IP4_CONF_FORWARDING=$(cat /proc/sys/net/ipv4/conf/all/forwarding)
+IP6_CONF_FORWARDING=$(cat /proc/sys/net/ipv6/conf/all/forwarding)
 
-sudo ip link add ${DUMMY_INTF} address ${MAC_ADDR} type dummy
-sudo brctl addbr ${BR_NAME}
-sudo brctl stp ${BR_NAME} on
-sudo brctl addif ${BR_NAME} ${DUMMY_INTF}
-sudo ip address add ${BR_ADDR}/24 dev ${BR_NAME} broadcast ${BR_BROADCAST_IP}
-sudo ip link set dev ${DUMMY_INTF} up
-sudo ip link set dev ${BR_NAME} up
+if [[ ! -d "/opt/topology-deployer/bridges/${BR_NAME}" ]]; then
+    sudo ip link add ${DUMMY_INTF} address ${MAC_ADDR} type dummy
+    sudo brctl addbr ${BR_NAME}
+    sudo brctl stp ${BR_NAME} on
+    sudo brctl addif ${BR_NAME} ${DUMMY_INTF}
+    sudo ip address add ${BR_ADDR}/24 dev ${BR_NAME} broadcast ${BR_BROADCAST_IP}
+    sudo ip -6 addr add 1234::${BR_ADDR}/120 dev ${BR_NAME}
+    sudo ip link set dev ${DUMMY_INTF} up
+    sudo ip link set dev ${BR_NAME} up
 
-if [[ "$IP4_FORWARD" != "1" ]]; then
-    sudo sh -c 'echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf'
-fi
+    if [[ "$IP4_FORWARD" != "1" ]]; then
+        sudo sh -c 'echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf'
+    fi
 
-if [[ "$IP4_CONF_FORWARDING" != "1" ]]; then
-    sudo sh -c 'echo "net.ipv4.conf.all.forwarding=1" >> /etc/sysctl.conf'
-fi
+    if [[ "$IP4_CONF_FORWARDING" != "1" ]]; then
+        sudo sh -c 'echo "net.ipv4.conf.all.forwarding=1" >> /etc/sysctl.conf'
+    fi
 
-sudo sysctl -p
+    if [[ "$IP6_CONF_FORWARDING" != "1" ]]; then
+        sudo sh -c 'echo "net.ipv6.conf.all.forwarding=1" >> /etc/sysctl.conf'
+    fi
 
-if [[ ! -d "${HOME}/.topology/bridges/${BR_NAME}" ]]; then
+    sudo sysctl -p
+
     # DHCP packets sent to VMs have no checksum (due to a longstanding bug).
     sudo iptables -t mangle -A POSTROUTING -o ${BR_NAME} -p udp -m udp --dport 68 -j CHECKSUM --checksum-fill
 
@@ -127,7 +133,7 @@ EOF
     sudo systemctl enable dnsmasq@${BR_NAME}.service
     sudo systemctl start dnsmasq@${BR_NAME}.service
 
-    sudo mkdir -p  "${HOME}/.topology/bridges/${BR_NAME}"
+    sudo mkdir -p  "/opt/topology-deployer/bridges/${BR_NAME}"
 else
     echo "Bridge already setup. Restarting dnsmasq"
     sudo systemctl restart dnsmasq@${BR_NAME}.service
