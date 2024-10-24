@@ -90,7 +90,6 @@ func delete(c *gin.Context) {
 	var sess *Session
 	var err error
 
-	log.Println("Before get session")
 	if sess = common.GetSession(c); sess == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "Unauthorized",
@@ -98,7 +97,6 @@ func delete(c *gin.Context) {
 		return
 	}
 
-	log.Println("After get session")
 	if topology, err = model.GetTopologyByID(uint(topologyID)); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"message": err.Error(),
