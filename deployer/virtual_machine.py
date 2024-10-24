@@ -24,7 +24,7 @@ class VirtualMachine:
     topology_ = Topology()
 
     def __new__(cls, conf):
-        if not VirtualMachine.__validate_vm_config(conf):
+        if not VirtualMachine._validate_vm_config(conf):
             return None
         return super(VirtualMachine, cls).__new__(cls)
     # end __new__
@@ -59,58 +59,69 @@ class VirtualMachine:
             self.vcpus_ = int(conf["vcpus"])
 
         if conf.get("ram", None) is not None:
-            self.vcpus_ = int(conf["ram"])
+            self.ram_ = int(conf["ram"])
 
         if conf.get("disk", None) is not None:
             self.root_disk_sz_ = conf["disk"]
     # end __init__
 
     @staticmethod
-    def __has_valid_vm_fields(vm):
-        if vm.get("name", None) is None:
+    def _has_valid_vm_fields(vm):
+        name = vm.get("name", None)
+        if not name or not isinstance(name, str):
             logging.critical("'name' is required key in vm config")
             return False
 
-        if vm.get("networks", None) is None:
+        networks = vm.get("networks", None)
+        if not networks or not isinstance(networks, dict):
             logging.critical("'networks' is required key in vm config")
             return False
 
-        if vm.get("vnc_port", None) is None:
+        vnc_port = vm.get("vnc_port", None)
+        if not vnc_port or not isinstance(vnc_port, int) or vnc_port < 5900:
             logging.critical("'vnc_port' is required key in vm config")
             return False
 
-        if vm.get("flavor", None) is None:
-            if (vm.get("vcpus", None) is None or
-                    vm.get("ram", None) is None or
-                    vm.get("disk", None) is None):
+        flavor = vm.get("flavor", None)
+        vcpus = vm.get("vcpus", None)
+        ram = vm.get("ram", None)
+        disk = vm.get("disk", None)
+
+        if not flavor:
+            if not vcpus or not ram or not disk:
                 logging.critical("'vcpu', 'ram' and 'disk' are mandatory if"
                                  " 'flavor' is not provided")
                 return False
         else:
-            if vm["flavor"] not in VM_FLAVORS:
+            if flavor not in VM_FLAVORS:
                 logging.critical("Invalid VM flavor")
                 return False
 
-        if vm.get("vcpus", None) is not None:
-            if not isinstance(vm["vcpus"], int) or vm["vcpus"] < 1:
-                logging.critical("'vcpu' is expected to be number >= 1")
-                return False
+        if vcpus == 0 or ram == 0:
+            logging.critical("'vcpu' or 'ram' is expected to be number >= 1")
+            return False
 
-        if vm.get("ram", None) is not None:
-            if not isinstance(vm["ram"], int) or vm["ram"] < 1024:
-                logging.critical("'ram' is expected to be number >= 1024")
-                return False
+        if disk == "":
+            logging.critical("'disk' is expected to be non empty string")
+            return False
 
-        if vm.get("disk", None) is not None:
-            if not isinstance(vm["disk"], str):
-                logging.critical("'disk' is expected to be in str format")
-                return False
+        if vcpus and (not isinstance(vcpus, int) or vcpus < 1):
+            logging.critical("'vcpu' is expected to be number >= 1")
+            return False
+
+        if ram and (not isinstance(ram, int) or ram < 1024):
+            logging.critical("'ram' is expected to be number >= 1024")
+            return False
+
+        if disk and not isinstance(disk, str):
+            logging.critical("'disk' is expected to be in str format")
+            return False
 
         return True
-    # end __has_valid_vm_fields
+    # end _has_valid_vm_fields
 
     @staticmethod
-    def __validate_vm_network_config(nws):
+    def _validate_vm_network_config(nws):
         for name, ips in nws.items():
             network = VirtualMachine.Topology().GetNetwork(name)
 
@@ -140,18 +151,18 @@ class VirtualMachine:
                     return False
 
         return True
-    # end __validate_vm_network_config
+    # end _validate_vm_network_config
 
     @staticmethod
-    def __validate_vm_config(vm):
-        if not VirtualMachine.__has_valid_vm_fields(vm):
+    def _validate_vm_config(vm):
+        if not VirtualMachine._has_valid_vm_fields(vm):
             return False
 
-        if not VirtualMachine.__validate_vm_network_config(vm["networks"]):
+        if not VirtualMachine._validate_vm_network_config(vm["networks"]):
             return False
 
         return True
-    # end __validate_vm_config
+    # end _validate_vm_config
 
     @staticmethod
     def Topology():
