@@ -1,18 +1,57 @@
+import {useState} from 'react';
 import {
   Card,
   Container,
   Row,
 } from 'reactstrap';
-import {CardHeaderSimple} from 'components/Cards';
-import {useState} from 'react';
-import {CreateVmForm} from 'components/Forms';
+import { useLoaderData, useLocation } from 'react-router-dom';
 
-export const CreateVirtualMachine = () => {
+import {CardHeaderSimple} from 'components/Cards';
+import {CreateVmForm} from 'components/Forms';
+import {SessionStore} from 'services/store';
+import { UserAPI } from 'services/api';
+
+const loader = async () => {
+  const user = SessionStore.getUser();
+
+  const data = await UserAPI.getUserObjects(user?.id)
+    .then(response => {
+      return response
+    }, error => {
+      return error;
+    });
+
+  return data;
+};
+
+const action = async ({request}) => {
+  const rawFormData = await request.formData();
+
+  let formData = {
+    name: rawFormData.get('name'),
+    flavor: rawFormData.get('flavor'),
+    vnc_port: parseInt(rawFormData.get('vnc_port'), 10),
+    vcpus: parseInt(rawFormData.get('vcpus'), 10),
+    ram: parseInt(rawFormData.get('ram'), 10),
+    disk: rawFormData.get('disk'),
+    networks: rawFormData.get('networks'),
+  };
+
+  debugger;
+  console.log(formData);
+
+  return null;
+};
+
+const CreateVirtualMachine = () => {
+  const objects = useLoaderData();
+
+  const { state } = useLocation();
 
   const initialState = {
     name: '', flavor: '', vnc_port: '',
-    topology_id: '', vcpu: '', ram: '',
-    disk: '', networks: [{
+    topology_id: state?.topologyId | '',
+    vcpus: '', ram: '', disk: '', networks: [{
       id: '', ipv4_address: '', ipv6_address: ''
     }],
   }
@@ -28,11 +67,18 @@ export const CreateVirtualMachine = () => {
             <CardHeaderSimple header={"Create Virtual Machine"} />
             <Container className='p-md-3' fluid>
               <CreateVmForm formData={formData}
-                setFormData={setFormData} init={initialState} />
+                setFormData={setFormData} init={initialState} objects={objects}
+                state={state} />
             </Container>
           </Card>
         </div>
       </Row>
     </Container>
   );
+};
+
+export {
+  CreateVirtualMachine,
+  loader,
+  action,
 };

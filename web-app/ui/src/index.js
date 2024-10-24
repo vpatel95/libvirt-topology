@@ -55,7 +55,11 @@ import {
   VirtualMachine,
   loader as vmLoader,
 } from "views/VirtualMachine";
-import { CreateVirtualMachine } from "views/CreateVirtualMachine";
+import {
+  CreateVirtualMachine,
+  loader as createVmLoader,
+  action as createVmAction,
+} from "views/CreateVirtualMachine";
 
 import { AuthWrapper } from "wrapper/AuthWrapper";
 
@@ -149,7 +153,9 @@ const router = createBrowserRouter(
               loader={vmLoader} />
             <Route
               path="virtual-machines/create"
-              element={<CreateVirtualMachine />} />
+              element={<CreateVirtualMachine />}
+              loader={createVmLoader}
+              action={createVmAction} />
             <Route
               path="*"
               element={<Navigate to="/dashboard" replace />} />

@@ -82,13 +82,31 @@ export const TopologyNetworkDetail = (props) => {
   );
 };
 
-export const TopologyVmDetail = ({tname, vms}) => {
+export const TopologyVmDetail = (props) => {
+
+  const topologyId = useParams();
+  const navigate = useNavigate();
+
+  const addVirtualMachine = () => {
+    navigate("/virtual-machines/create", {state: topologyId});
+  };
+
+  const { tname, vms, edit } = props;
   return (
     <Row className="mb-3">
       <div className="col">
         <Card className="shadow">
           <CardHeader className="border-0">
-            <h2>{ tname } Virtual Machines</h2>
+            <Row className="align-items-center">
+              <div className="col">
+                <h3>{ tname } Virtual Machines</h3>
+              </div>
+              {edit && (
+                <Button onClick={addVirtualMachine} color={"default"} className={"mr-3"}>
+                  Add Virtual Machine
+                </Button>
+              )}
+            </Row>
           </CardHeader>
           <CardBody>
             <Row>

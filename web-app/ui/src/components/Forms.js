@@ -3,11 +3,19 @@ import {
 } from 'reactstrap';
 
 import {Form, useNavigate} from 'react-router-dom';
+import {useEffect, useState} from 'react';
 
 export const CreateVmForm = (props) => {
-  const {formData, setFormData, init} = props;
+  const { formData, setFormData, init, objects, state } = props;
   const navigate = useNavigate();
 
+  const [topologies] = useState(objects?.topologies?.info);
+  const [networks, setNetworks] = useState()
+
+  useEffect(() => {
+    let networks = objects?.networks?.info;
+    setNetworks(networks?.filter((nw) => nw.topology_id === formData.topology_id))
+  }, [formData.topology_id, objects?.networks]);
 
   const addNetwork = () => {
     setFormData({...formData,
@@ -42,13 +50,13 @@ export const CreateVmForm = (props) => {
     if (name === 'flavor') {
       switch(value) {
         case "pe":
-          newData = { ...newData, vcpu: 4, disk: '80G', ram: 16384 };
+          newData = { ...newData, vcpus: 4, disk: '80G', ram: 16384 };
           break;
         case "ce":
-          newData = { ...newData, vcpu: 2, disk: '40G', ram: 8192 };
+          newData = { ...newData, vcpus: 2, disk: '40G', ram: 8192 };
           break;
         default:
-          newData = { ...newData, vcpu: '', disk: '', ram: '' };
+          newData = { ...newData, vcpus: '', disk: '', ram: '' };
           break;
       }
     }
@@ -82,13 +90,13 @@ export const CreateVmForm = (props) => {
         </Col>
       </FormGroup>
       <FormGroup key="vcpuFg" row>
-        <Label for="vcpu" sm={2}>vCPUs : </Label>
+        <Label for="vcpus" sm={2}>vCPUs : </Label>
         <Col sm={4}>
           <Input
             type="number"
             min="1" max="50"
             placeholder="Enter Number of vCPUs"
-            name="vcpu" value={formData.vcpu}
+            name="vcpus" value={formData.vcpus}
             onChange={changeHandler}
             disabled={formData.flavor !== 'custom'} />
         </Col>
@@ -116,6 +124,22 @@ export const CreateVmForm = (props) => {
             disabled={formData.flavor !== 'custom'} />
         </Col>
       </FormGroup>
+      <FormGroup key="topologyIdFg" row>
+        <Label for="topology_id" sm={2}>Topology : </Label>
+        <Col sm={4}>
+          <Input
+            className="" type="select"
+            name="topology_id" value={formData.topology_id}
+            onChange={changeHandler} disabled={!!(state?.topologyId)}>
+            <option value="0">--- Select Topology ---</option>
+            {topologies &&
+              topologies?.map((topology, index) => (
+                <option key={index} value={topology.ID}>{topology.name}</option>
+              ))
+            }
+          </Input>
+        </Col>
+      </FormGroup>
       <br />
       <Row className='mb-4'>
         <Col sm={6}>
@@ -137,9 +161,12 @@ export const CreateVmForm = (props) => {
                     placeholder="Choose Network"
                     value={network.id} type="select"
                     onChange={(e) => updateNetworks(e, idx)}>
-                    <option value="1">Network 1</option>
-                    <option value="2">Network 2</option>
-                    <option value="3">Network 3</option>
+                    <option value="0">--- Select Network ---</option>
+                    {networks &&
+                      networks?.map((nw, index) => (
+                        <option key={index} value={nw.ID}>{nw.name}</option>
+                      ))
+                    }
                   </Input>
                 </Col>
                 <Col sm={3}>
