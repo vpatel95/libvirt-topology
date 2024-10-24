@@ -26,6 +26,16 @@ func validateVm(vmReq VmRB) error {
 		return errors.New("Invalid request parameters")
 	}
 
+	for _, net := range vmReq.Networks {
+		if !valid.IsIP(net.IPv4Address) {
+			return errors.New("Invalid request parameters")
+		}
+
+		if len(net.IPv6Address) != 0 && !valid.IsIP(net.IPv6Address) {
+			return errors.New("Invalid request parameters")
+		}
+	}
+
 	return nil
 }
 

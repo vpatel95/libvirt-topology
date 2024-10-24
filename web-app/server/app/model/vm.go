@@ -75,12 +75,12 @@ type (
 		Vcpu       int       `gorm:"column:vcpu" json:"vcpu"`
 		TopologyID int       `gorm:"column:topology_id;not null" json:"topology_id"`
 		UserID     int       `gorm:"column:user_id;not null" json:"user_id"`
-		Networks   []Network `gorm:"many2many:virtual_machine_networks;"`
+		Networks   []Network `gorm:"many2many:virtual_machine_networks; constraint:OnDelete:CASCADE"`
 	}
 
 	VirtualMachineNetwork struct {
-		VirtualMachineID int    `gorm:"column:virtual_machine_id;primaryKey"`
-		NetworkID        int    `gorm:"column:network_id;primaryKey"`
+		VirtualMachineID int    `gorm:"column:virtual_machine_id;primaryKey;constraint:OnDelete:CASCADE"`
+		NetworkID        int    `gorm:"column:network_id;primaryKey;constraint:OnDelete:CASCADE"`
 		IPv4Address      string `gorm:"column:ipv4_address;not null"`
 		IPv6Address      string `gorm:"column:ipv6_address"`
 	}
@@ -247,22 +247,28 @@ func CreateVm(vmReq VmRB) (*VirtualMachine, error) {
 		}
 
 		vm.Networks = append(vm.Networks, nw)
-		if _, ipNet, err = net.ParseCIDR(nw.Subnet4); err != nil {
-			return nil, err
-		}
-
 		ip4 := net.ParseIP(vmNet.IPv4Address)
-		if !(ipNet.Contains(ip4)) {
-			return nil, errors.New("Invalid request parameters")
-		}
 
-		if len(vmNet.IPv6Address) != 0 && nw.HasV6 {
-			if _, ipNet, err = net.ParseCIDR(nw.Subnet6); err != nil {
+		if nw.Type != Isolated {
+			if _, ipNet, err = net.ParseCIDR(nw.Subnet4); err != nil {
 				return nil, err
 			}
-			ip6 := net.ParseIP(vmNet.IPv6Address)
-			if !(ipNet.Contains(ip6)) {
+
+			if !(ipNet.Contains(ip4)) {
 				return nil, errors.New("Invalid request parameters")
+			}
+		}
+
+		if nw.HasV6 && len(vmNet.IPv6Address) != 0 {
+			ip6 := net.ParseIP(vmNet.IPv6Address)
+
+			if nw.Type != Isolated {
+				if _, ipNet, err = net.ParseCIDR(nw.Subnet6); err != nil {
+					return nil, err
+				}
+				if !(ipNet.Contains(ip6)) {
+					return nil, errors.New("Invalid request parameters")
+				}
 			}
 		}
 	}
