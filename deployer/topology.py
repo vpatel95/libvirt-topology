@@ -2,8 +2,8 @@ import json
 import logging
 import sys
 
-from network import Network
-from virtual_machine import VirtualMachine
+from .network import Network
+from .virtual_machine import VirtualMachine
 
 class Topology:
     supported_network_types_ = ["nat", "isolated", "management"]

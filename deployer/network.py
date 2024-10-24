@@ -2,7 +2,7 @@ import ipaddress
 import logging
 import sys
 
-import utils
+from .utils import ExecuteCommand
 
 class Network:
     topology_ = None
@@ -57,7 +57,7 @@ class Network:
                 self.name_, self.network4_,
                 self.ip4_, self.dhcp_start4_,
                 self.dhcp_end4_, self.broadcast4_)
-        utils.ExecuteCommand(cmd)
+        ExecuteCommand(cmd)
 
 
     def __create_management_network(self) -> None:
@@ -66,12 +66,12 @@ class Network:
                 self.name_, self.network4_,
                 self.ip4_, self.dhcp_start4_,
                 self.dhcp_end4_)
-        utils.ExecuteCommand(cmd)
+        ExecuteCommand(cmd)
 
     def __create_isolated_network(self) -> None:
         logging.info("Creating Isolated network : {}".format(self.name_))
         cmd = "bash create_isolated_network.sh {}".format(self.name_)
-        utils.ExecuteCommand(cmd)
+        ExecuteCommand(cmd)
 
     def Create(self):
         if self.type_ == "nat":
