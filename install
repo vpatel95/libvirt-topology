@@ -25,11 +25,9 @@ pip3 install libvirt-python
 sudo usermod -a -G libvirt $USER
 sudo usermod -a -G libvirt-qemu $USER
 
-chmod +x ./scripts/*
+sudo mkdir /var/lib/libvirt/images/templates
+wget https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img
 
-sudo cp ./scripts/create_nat_network.sh /usr/bin/create_nat_network
-sudo cp ./scripts/create_management_network.sh /usr/bin/create_management_network
-sudo cp ./scripts/create_isolated_network.sh /usr/bin/create_isolated_network
-sudo cp ./scripts/vm_helper.sh /usr/bin/vm_helper
+sudo mv -i jammy-server-cloudimg-amd64.img /var/lib/libvirt/images/templates/ubuntu-22.04-server.qcow2
 
 sudo pip3 install .
