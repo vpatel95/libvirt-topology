@@ -146,7 +146,7 @@ const NetworkCreate = () => {
                       className="" type="select"
                       name="topology_id" value={formData.topology_id}
                       onChange={changeHandler} disabled={!!(state?.topologyId)}>
-                      <option value="0"></option>
+                      <option value="0">--- Select Topology ---</option>
                       {topologies &&
                         topologies.map((topology, index) => (
                           <option key={index} value={topology.ID}>{topology.name}</option>

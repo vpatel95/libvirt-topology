@@ -96,7 +96,7 @@ func ValidateSessionID() gin.HandlerFunc {
 		var user User
 		user.Load(data["user"].(JSON))
 
-		sess, err := sessionManager.SessionReadOrCreate(c.Request)
+		sess, err := sessionManager.SessionRead(c.Request)
 		if err != nil {
 			log.Println("[ValidateSessionID] ::: Failed to get session : " + err.Error())
 			c.AbortWithStatusJSON(http.StatusUnauthorized, JSON{

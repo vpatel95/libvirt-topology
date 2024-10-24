@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -11,7 +12,12 @@ import (
 	"github.com/vpatel95/topology-deployer/app/api/middleware"
 	"github.com/vpatel95/topology-deployer/app/model"
 	db "github.com/vpatel95/topology-deployer/database"
+	"github.com/vpatel95/topology-deployer/globals"
 	"github.com/vpatel95/topology-deployer/route"
+)
+
+var (
+	sm = globals.SessionManager
 )
 
 type App struct {
@@ -34,6 +40,13 @@ func Init(conf *db.DBConfig) {
 	}
 
 	db.DB = model.Migration(db.DB)
+
+	// Use Authorization Header instead of Cookie
+	sm.Config.CleanerInterval = 1 * time.Second
+	sm.Config.EnableHttpHeader = true
+	sm.Config.SessionHeader = "Authorization"
+	sm.Config.MaxLifetime = 1 * time.Hour
+
 	route.InitRouter()
 }
 

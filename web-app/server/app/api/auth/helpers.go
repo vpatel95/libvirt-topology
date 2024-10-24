@@ -17,7 +17,7 @@ func matchHash(password string, hash string) bool {
 	return err == nil
 }
 
-func generateSid(data JSON) (string, error) {
+func generateToken(data JSON) (string, error) {
 
 	sid := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user": data,
@@ -28,13 +28,13 @@ func generateSid(data JSON) (string, error) {
 
 	key, err := ioutil.ReadFile(keyPath)
 	if err != nil {
-		log.Println("[generateSid} ::: Key file read error = " + err.Error())
+		log.Println("[generateToken} ::: Key file read error = " + err.Error())
 		return "", err
 	}
 
 	sidStr, err := sid.SignedString(key)
 	if err != nil {
-		log.Println("[generateSid] ::: Session ID string error = " + err.Error())
+		log.Println("[generateToken] ::: Session ID string error = " + err.Error())
 	}
 
 	return sidStr, err
