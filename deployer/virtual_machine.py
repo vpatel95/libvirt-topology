@@ -216,6 +216,15 @@ class VirtualMachine:
 
         self.__execute_virt_install_cmd()
 
+    def Delete(self):
+        logging.warning("Deleting Virtual Machine : {}".format(self.name_))
+
+        cmd = "sudo virsh destroy {}".format(self.name_)
+        ExecuteCommand(cmd)
+
+        cmd = "sudo virsh undefine --remove-all-storage {}".format(self.name_)
+        ExecuteCommand(cmd)
+
     def ToString(self) -> str:
         vm_str = ""
         vm_str += "Flavor : {}\n".format(self.flavor_)

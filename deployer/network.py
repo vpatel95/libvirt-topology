@@ -6,7 +6,7 @@ import xml.etree.cElementTree as ET
 
 import deployer.globals as globals
 from .globals import LIBVIRT_QEMU_NW, NAT_NW_BASE
-from .nat_utils import AddIptableRules, AddLinuxBridge, CheckForwarding
+from .nat_utils import AddIptableRules, AddLinuxBridge, CheckForwarding, DelIptableRules, DelLinuxBridge
 from .utils import ExecuteCommand
 
 class Network:
@@ -145,6 +145,27 @@ class Network:
         ExecuteCommand(cmd)
         cmd = "sudo virsh net-autostart {}".format(self.name_)
         ExecuteCommand(cmd)
+
+    def __delete_nat_network(self):
+        DelIptableRules(self.name_, str(self.network4_))
+        DelLinuxBridge(self.name_)
+        NAT_NW_BASE.joinpath(self.name_).rmdir()
+        pass
+
+    def __delete_libvirt_network(self):
+        cmd = "sudo virsh net-destroy {}".format(self.name_)
+        ExecuteCommand(cmd)
+        cmd = "sudo virsh net-undefine {}".format(self.name_)
+        ExecuteCommand(cmd)
+
+    def Delete(self):
+        if self.type_ == "nat":
+            self.__delete_nat_network()
+        elif self.type_ in ["isolated","management"]:
+            self.__delete_libvirt_network()
+        else:
+            logging.error("Unknown network type {}".format(self.type_))
+            sys.exit(1)
 
 
     def Create(self):

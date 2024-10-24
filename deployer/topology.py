@@ -4,6 +4,7 @@ import sys
 
 import deployer.globals as globals
 # from .config import NO_NETWORK, NO_VM, PRINT_NETWORK, PRINT_VM
+from .globals import OP_CREATE, OP_DELETE
 from .network import Network
 from .virtual_machine import VirtualMachine
 
@@ -25,17 +26,10 @@ class Topology:
         self.networks = {}
         self.vms = {}
 
-        if not globals.NO_NETWORK:
-            self.CreateNetworks()
-
-        if not globals.NO_VM:
-            self.CreateVms()
-
-        if globals.PRINT_NETWORK:
-            self.PrintNetworks()
-
-        if globals.PRINT_VM:
-            self.PrintVms()
+        if globals.OP == OP_CREATE:
+            self.__create()
+        else:
+            self.__delete()
 
     def __is_nw_type_valid(self, nw_type: str) -> bool:
         return nw_type in self.supported_network_types_
@@ -53,14 +47,6 @@ class Topology:
             logging.critical("No network config found. Exiting")
             sys.exit(1)
 
-    def GetNetwork(self, name):
-        return self.networks.get(name, None)
-
-    def GetNetworkType(self, name):
-        if self.GetNetwork(name) is not None:
-            return self.networks[name].type_
-        return ""
-
     def __parse_vms(self):
         vms_config = self.config.get("vms", [])
         if vms_config:
@@ -68,6 +54,55 @@ class Topology:
                 if vm_conf is {}:
                     continue
                 self.vms[vm_conf["name"]] = VirtualMachine(vm_conf, self)
+
+    def __delete(self):
+        if not globals.NO_VM:
+            self.__delete_vms()
+
+        if not globals.NO_NETWORK:
+            self.__delete_networks()
+
+    def __delete_networks(self):
+        self.__parse_networks()
+        for _, nw in self.networks.items():
+            nw.Delete()
+        pass
+
+    def __delete_vms(self):
+        self.__parse_vms()
+        for _, vm in self.vms.items():
+            vm.Delete()
+
+    def __create(self):
+        if not globals.NO_NETWORK:
+            self.__create_networks()
+
+        if not globals.NO_VM:
+            self.__create_vms()
+
+        if globals.PRINT_NETWORK:
+            self.PrintNetworks()
+
+        if globals.PRINT_VM:
+            self.PrintVms()
+
+    def __create_networks(self):
+        self.__parse_networks()
+        for _, nw in self.networks.items():
+            nw.Create()
+
+    def __create_vms(self):
+        self.__parse_vms()
+        for _, vm in self.vms.items():
+            vm.Create()
+
+    def GetNetwork(self, name):
+        return self.networks.get(name, None)
+
+    def GetNetworkType(self, name):
+        if self.GetNetwork(name) is not None:
+            return self.networks[name].type_
+        return ""
 
     def PrintNetworks(self):
         for name, nw in self.networks.items():
@@ -79,12 +114,3 @@ class Topology:
             print("Vm : {}".format(name))
             print(vm.ToString())
 
-    def CreateNetworks(self):
-        self.__parse_networks()
-        for _, nw in self.networks.items():
-            nw.Create()
-
-    def CreateVms(self):
-        self.__parse_vms()
-        for _, vm in self.vms.items():
-            vm.Create()

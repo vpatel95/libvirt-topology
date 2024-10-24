@@ -60,3 +60,33 @@ def AddIptableRules(name: str, nw4: str) -> None:
     ExecuteCommand("sudo iptables -t filter -A FORWARD -i {} -j ACCEPT".format(name))
     ExecuteCommand("sudo iptables -t filter -A FORWARD -o {} -j ACCEPT".format(name))
     ExecuteCommand("sudo sh -c 'iptables-save > /etc/iptables/rules.v4'")
+
+def DelLinuxBridge(name: str) -> None:
+    dummy_intf = "{}-nic".format(name)
+    ExecuteCommand("sudo ip link set dev {} down".format(dummy_intf))
+    ExecuteCommand("sudo ip link set dev {} down".format(name))
+    ExecuteCommand("sudo ip link del {}".format(dummy_intf))
+    ExecuteCommand("sudo ip link del {}".format(name))
+
+def DelIptableRules(name: str, nw4: str) -> None:
+    ExecuteCommand("sudo iptables -t mangle -D POSTROUTING "
+                   "-o {} -p udp -m udp --dport 68 -j CHECKSUM --checksum-fill".format(name))
+    ExecuteCommand("sudo iptables -t nat -D POSTROUTING "
+                   "-s {} -d 224.0.0.0/24 -j RETURN".format(nw4))
+    ExecuteCommand("sudo iptables -t nat -D POSTROUTING "
+                   "-s {} -d 255.255.255.255/32 -j RETURN".format(nw4))
+    ExecuteCommand("sudo iptables -t nat -D POSTROUTING "
+                   "-s {} ! -d {} -p tcp -j MASQUERADE --to-ports 1024-65535".format(nw4, nw4))
+    ExecuteCommand("sudo iptables -t nat -D POSTROUTING "
+                   "-s {} ! -d {} -p udp -j MASQUERADE --to-ports 1024-65535".format(nw4, nw4))
+    ExecuteCommand("sudo iptables -t nat -D POSTROUTING -s {} ! -d {} -j MASQUERADE".format(nw4, nw4))
+    ExecuteCommand("sudo iptables -t filter -D INPUT "
+                   "-i {} -p udp -m udp -m multiport --dports 53,67 -j ACCEPT".format(name))
+    ExecuteCommand("sudo iptables -t filter -D INPUT -i "
+                   "{} -p tcp -m tcp -m multiport --dports 53,67 -j ACCEPT".format(name))
+    ExecuteCommand("sudo iptables -t filter -D FORWARD -d {} -o {} -j ACCEPT".format(nw4, name))
+    ExecuteCommand("sudo iptables -t filter -D FORWARD -s {} -i {} -j ACCEPT".format(nw4, name))
+    ExecuteCommand("sudo iptables -t filter -D FORWARD -i {} -j ACCEPT".format(name))
+    ExecuteCommand("sudo iptables -t filter -D FORWARD -o {} -j ACCEPT".format(name))
+    ExecuteCommand("sudo sh -c 'iptables-save > /etc/iptables/rules.v4'")
+    pass
