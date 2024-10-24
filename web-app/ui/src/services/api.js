@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {SessionStore} from './store';
 
-const BASE_URL = 'http://172.31.15.220:5000/api';
+const BASE_URL = 'http://localhost:5000/api';
 const AUTH_API_PREFIX = '/auth';
 const TOPOLOGY_API_PREFIX = '/topology';
 const NETWORK_API_PREFIX = '/network';
@@ -33,7 +33,7 @@ export const setupInterceptors = (navigate) => {
         async (error) => {
             if (error?.response?.status === 401) {
                 SessionStore.resetSession();
-                navigate('/auth/login', {replace: true});
+                navigate('/auth/login', {state: {prevPath: true}});
             } else {
                 return Promise.reject(error);
             }

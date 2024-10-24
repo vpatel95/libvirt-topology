@@ -22,7 +22,10 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || "/dashboard";
+  console.log(location);
+
+  const prevPath = location.state?.prevPath === true ? -2 : null;
+  const from = prevPath || "/dashboard";
 
   const initialData = {
     username: '',

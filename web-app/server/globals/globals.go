@@ -8,8 +8,8 @@ import (
 
 var (
 	SessionManager = sm.New(sm.SessionManagerConfig{
-		CleanerInterval:    1 * time.Second,
-		MaxLifetime:        15 * time.Second,
+		CleanerInterval:    30 * time.Second,
+		MaxLifetime:        1 * time.Hour,
 		EnableHttpHeader:   true,
 		SessionHeader:      "Authorization",
 		AutoRefreshSession: false,
