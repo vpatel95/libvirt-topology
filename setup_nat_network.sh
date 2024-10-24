@@ -4,15 +4,16 @@ set -e
 
 function usage() {
     echo "Usage: "
-    echo -e "\tbash ${0} <bridge_name> <bridge_subnet> <bridge_addr> <dhcp_start> <dhcp_end>"
+    echo -e "\tbash ${0} <bridge_name> <bridge_subnet> <bridge_addr> <dhcp_start> <dhcp_end> <broadcast>"
     echo -e "\t\tbridge_name : string"
     echo -e "\t\tbridge_subnet : X.X.X.X/mask"
     echo -e "\t\tbridge_addr : X.X.X.X"
     echo -e "\t\tdhcp_start : X.X.X.X"
     echo -e "\t\tdhcp_end : X.X.X.X"
+    echo -e "\t\tbroadcast : X.X.X.255"
 }
 
-if [[ "$#" -ne 5 ]]; then
+if [[ "$#" -ne 6 ]]; then
     usage
     exit 1
 fi
@@ -25,6 +26,7 @@ BR_SUBNET=${2}
 BR_ADDR=${3}
 BR_START_IP=${4}
 BR_END_IP=${5}
+BR_BROADCAST_IP=${5}
 
 # static
 MAC_ADDR=$(hexdump -vn3 -e '/3 "52:54:00"' -e '/1 ":%02x"' -e '"\n"' /dev/urandom)
@@ -35,7 +37,7 @@ sudo ip link add ${DUMMY_INTF} address ${MAC_ADDR} type dummy
 sudo brctl addbr ${BR_NAME}
 sudo brctl stp ${BR_NAME} on
 sudo brctl addif ${BR_NAME} ${DUMMY_INTF}
-sudo ip address add ${BR_ADDR}/24 dev ${BR_NAME} broadcast 10.10.1.255
+sudo ip address add ${BR_ADDR}/24 dev ${BR_NAME} broadcast ${BR_BROADCAST_IP}
 sudo ip link set dev ${DUMMY_INTF} up
 sudo ip link set dev ${BR_NAME} up
 
