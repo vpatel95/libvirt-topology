@@ -200,7 +200,19 @@ func (vm *VirtualMachine) GetAddrByNID(nid int, v4 bool) (string, error) {
 	return ip, nil
 }
 
-func GetVirtualMachineById(vid int) (*VmResp, error) {
+func GetVirtualMachineByID(id uint) (*VirtualMachine, error) {
+	var err error
+	var vm VirtualMachine
+
+	db := database.DB
+	if err = db.First(&vm, id).Error; err != nil {
+		return nil, err
+	}
+
+	return &vm, nil
+}
+
+func GetVmRespById(vid int) (*VmResp, error) {
 	var vm VirtualMachine
 	var err error
 
@@ -330,4 +342,10 @@ func CreateVm(vmReq VmRB) (*VirtualMachine, error) {
 	}
 
 	return &vm, nil
+}
+
+func DeleteVm(vm *VirtualMachine) error {
+	db := database.DB.Unscoped()
+
+	return db.Delete(vm).Error
 }

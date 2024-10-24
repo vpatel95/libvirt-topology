@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	sm "github.com/vpatel95/session-manager"
@@ -73,6 +74,33 @@ func update(c *gin.Context) {
 }
 
 func delete(c *gin.Context) {
-	log.Println("In VM Delete")
-	common.RespondNotImplemented(c)
+	var vm *VirtualMachine
+	vmID, _ := strconv.Atoi(c.Param("id"))
+	var sess *Session
+	var err error
+
+	if sess = common.GetSession(c); sess == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	if vm, err = model.GetVirtualMachineByID(uint(vmID)); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	if err := model.DeleteVm(vm); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data":    vm.Serialize(),
+	})
 }
