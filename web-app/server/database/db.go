@@ -2,8 +2,8 @@ package database
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/vpatel95/topology-deployer/env"
 	"gorm.io/gorm"
@@ -23,7 +23,7 @@ type DBConfig struct {
 }
 
 func GetConfig() *DBConfig {
-	confFile, err := ioutil.ReadFile(env.DBConfig)
+	confFile, err := os.ReadFile(env.DBConfig)
 	if err != nil {
 		log.Println("Error while reading session config from " + env.DBConfig)
 		log.Println("Error : ", err)

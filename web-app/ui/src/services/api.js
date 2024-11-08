@@ -1,7 +1,7 @@
 import axios from 'axios';
-import {SessionStore} from './store';
+import {SessionStore} from '/src/services/store';
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = import.meta.env.VITE_API_URL + '/api';
 const AUTH_API_PREFIX = '/auth';
 const TOPOLOGY_API_PREFIX = '/topology';
 const NETWORK_API_PREFIX = '/network';

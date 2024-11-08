@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: td-ui
+  namespace: topology-deployer
+spec:
+  replicas: 1  # Number of replicas (adjust as needed)
+  selector:
+    matchLabels:
+      app: td-ui
+  template:
+    metadata:
+      labels:
+        app: td-ui
+    spec:
+      containers:
+      - name: td-ui
+        image: docker.io/vpatel95/topology-deployer:web-ui-v1  # Use the image you pushed
+        ports:
+        - containerPort: 80
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: API_ENDPOINT
+          value: "http://td-api-server.$(POD_NAMESPACE).svc.cluster.local/api"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: td-ui
+  namespace: topology-deployer
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30080
+  selector:
+    app: td-ui

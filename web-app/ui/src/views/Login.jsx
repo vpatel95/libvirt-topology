@@ -51,6 +51,8 @@ const Login = () => {
 
     const { username, password } = loginData;
 
+    console.log('called handleLogin', username, password);
+
     AuthAPI.login(username, password).then(res => {
       const accessToken = res?.data?.token;
       const user = res?.data?.user;
